@@ -1,0 +1,99 @@
+visual:
+  title: "立ち絵/衣装"
+  headerRow: 1
+  dataStartRow: 2
+  columns:
+    id:
+      type: number
+      description: "管理用番号"
+      required: true
+
+    costumeName:
+      type: string
+      description: "衣装名 ※識別するための管理用"
+      required: false
+
+    visualUrl:
+      type: image
+      description: "立ち絵の画像URL"
+      source_type:
+        enum:
+          upload: "アップロード"
+          select: "画像選択"
+        default: "upload"
+      mediaLibrary: "asset/visual/visual"
+      uploadPath: "asset/visual/visual"
+      required: true
+
+    thumdUrl:
+      type: image
+      description: "サムネイル画像のURL"
+      source_type:
+        enum:
+          upload: "アップロード"
+          select: "画像選択"
+        default: "upload"
+      mediaLibrary: "asset/visual/thumd"
+      uploadPath: "asset/visual/thumd"
+      required: true
+
+    thumdBackground:
+      type: image
+      description: "サムネイル用の背景（未入力の場合デフォルト背景）"
+      source_type:
+        enum:
+          upload: "アップロード"
+          select: "画像選択"
+        default: "upload"
+      mediaLibrary: "asset/visual/thumd/background"
+      uploadPath: "asset/visual/thumd/background"
+      default: "asset/visual/thumd/background/default_thumdBackground.png"
+      required: false
+
+    visualBackground:
+      type: image
+      description: "立ち絵ごとのページ背景（未入力の場合デフォルト背景）"
+      source_type:
+        enum:
+          upload: "アップロード"
+          select: "画像選択"
+        default: "upload"
+      mediaLibrary: "asset/visual/background"
+      uploadPath: "asset/visual/background"
+      default: "asset/visual/background/default_visualBackground.png"
+      required: false
+
+    comment:
+      type: string
+      description: "衣装コメント ※管理用"
+      required: false
+
+    characterDesign:
+      label: "キャラクターデザイン"
+      type: string
+      description: "キャラクターデザイン"
+      required: false
+
+    illustrator:
+      label: "イラストレーター"
+      type: string
+      description: "イラストレーター"
+      required: false
+
+    live2d:
+      label: "Live2Dモデリング"
+      type: string
+      description: "Live2Dモデラー"
+      required: false
+
+    3dModeling:
+      label: "3Dモデリング"
+      type: string
+      description: "3Dモデラー"
+      required: false
+
+    priority:
+      type: number
+      description: "表示優先度"
+      min: 1
+      required: true

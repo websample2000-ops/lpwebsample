@@ -1,0 +1,52 @@
+schedule:
+  title: "スケジュール"
+  headerRow: 1
+  dataStartRow: 2
+  columns:
+    id:
+      type: number
+      description: "管理用番号"
+      required: true
+
+    title:
+      type: string
+      description: "タイトル"
+      required: true
+
+    scheduleTag:
+      type: string
+      description: "イベントの区分け用ラベル"
+      references:
+        table: "scheduleTag"
+        field: "id"
+        display: "tagLabel"
+      required: true
+
+    schedule_at:
+      type: date
+      description: "日時"
+      format: "yyyy-mm-dd"
+      required: true
+
+    time:
+      type: date
+      description: "時間"
+      format: "hh:mm"
+      default: null
+      required: false
+
+    detail:
+      type: text
+      description: "詳細"
+      required: false
+
+    picture:
+      type: url
+      description: "添付画像や動画"
+      required: false
+
+    is_active:
+      type: boolean
+      description: "表示フラグ（true: 表示 / false: 非表示）"
+      default: true
+      required: true

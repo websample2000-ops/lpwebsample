@@ -1,0 +1,66 @@
+shop:
+  title: "ショップリスト"
+  headerRow: 1
+  dataStartRow: 2
+  columns:
+    id:
+      type: number
+      description: "管理用番号"
+      required: true
+
+    name:
+      type: string
+      description: "商品名"
+      required: true
+
+    shopTag:
+      type: string
+      description: "商品区分"
+      references:
+        table: "shopTag"
+        field: "id"
+        display: "tagName"
+      required: true
+
+    merchandiseImage:
+      type: image
+      description: "商品画像"
+      source_type:
+        enum:
+          upload: "アップロード"
+          select: "画像選択"
+        default: "upload"
+      mediaLibrary: "asset/shop"
+      uploadPath: "asset/shop"
+      required: true
+
+    price:
+      type: number
+      description: "価格"
+      required: true
+
+    priority:
+      type: number
+      description: "表示優先度"
+      required: true
+
+    # ショップページのリンク
+    booth:
+      type: url
+      description: "boothの商品ページURL"
+      required: false
+
+    suzuri:
+      type: url
+      description: "suzuriの商品ページURL"
+      required: false
+
+    base:
+      type: url
+      description: "baseの商品ページURL"
+      required: false
+
+    fanbox:
+      type: url
+      description: "fanboxの商品ページURL"
+      required: false

@@ -1,0 +1,32 @@
+gallery:
+  title: "三面図、表情差分など"
+  headerRow: 1
+  dataStartRow: 2
+  columns:
+    id:
+      type: number
+      description: "管理用番号"
+      required: true
+
+    name:
+      type: string
+      description: "画像タイトル ※識別用のテキスト"
+      required: false
+
+    imageUrl:
+      type: image
+      description: "画像のURL"
+      source_type:
+        enum:
+          upload: "アップロード"
+          select: "画像選択"
+        default: "upload"
+      mediaLibrary: "asset/gallery"
+      uploadPath: "asset/gallery"
+      required: true
+    
+    priority:
+      type: number
+      description: "表示優先度"
+      min: 1
+      required: true

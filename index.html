@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星乃ルナ Official Website | バーチャルナビゲーター</title>
+  <meta name="description" content="見習い星読みバーチャルナビゲーター「星乃ルナ」の公式ポートフォリオ・オフィシャルサイトです。最新のお知らせ、スケジュール、動画、グッズ情報をお届けします。">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       グローバルナビゲーション
+  ============================================================ -->
+  <nav class="global-nav" id="global-nav">
+    <div class="nav-container">
+      <a href="#sec-profile" class="nav-logo">
+        <span class="logo-symbol">✦</span>
+        <span class="logo-text">Luna Hoshino</span>
+      </a>
+
+      <!-- 動的に同期されるナビゲーションリンク -->
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#sec-profile" class="nav-item active">Profile</a></li>
+        <li data-nav-for="notice"><a href="#sec-notice" class="nav-item">Notice</a></li>
+        <li data-nav-for="schedule"><a href="#sec-schedule" class="nav-item">Schedule</a></li>
+        <li data-nav-for="gallery"><a href="#sec-gallery" class="nav-item">Gallery</a></li>
+        <li data-nav-for="movie"><a href="#sec-movie" class="nav-item">Movie</a></li>
+        <li data-nav-for="shop"><a href="#sec-shop" class="nav-item">Shop</a></li>
+        <li data-nav-for="linkList"><a href="#sec-linkList" class="nav-item">Link</a></li>
+      </ul>
+
+      <!-- ヘッダーSNSリンク -->
+      <div class="nav-sns">
+        <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="sns-btn" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </a>
+        <a href="https://x.com/" target="_blank" rel="noopener noreferrer" class="sns-btn" aria-label="X (Twitter)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+      </div>
+
+      <!-- モバイルメニューボタン -->
+      <button class="menu-toggle" id="menu-toggle" aria-label="メニュー開閉">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       固定最上部：プロフィール＆立ち絵セクション
+       (schema/profile.yaml & schema/visual.yaml に準拠)
+  ============================================================ -->
+  <header id="sec-profile" class="profile-hero-section">
+    <!-- 背景デコレーション -->
+    <div class="hero-bg-canvas" id="hero-bg">
+      <div class="glow-orb orb-1"></div>
+      <div class="glow-orb orb-2"></div>
+      <div class="glow-orb orb-3"></div>
+      <div class="star-particles"></div>
+    </div>
+
+    <div class="container hero-container">
+      
+      <!-- 立ち絵・ビジュアル表示エリア -->
+      <div class="hero-visual-col">
+        <!-- 立ち絵カードフレーム -->
+        <div class="visual-stage">
+          <div class="visual-card">
+            <!-- 立ち絵画像 (JSで動的切り替え可能) -->
+            <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&auto=format&fit=crop&q=80" 
+                 alt="立ち絵メインビジュアル" 
+                 id="current-visual-img" 
+                 class="visual-img">
+            <div class="visual-badge" id="current-costume-badge">通常衣装（星空のローブ）</div>
+          </div>
+
+          <!-- 衣装セレクター (複数立ち絵の切り替え) -->
+          <div class="costume-selector" id="costume-selector-wrapper">
+            <div class="costume-selector-label">✦ COSTUME SELECT ✦</div>
+            <div class="costume-thumbs" id="costume-thumbs">
+              <!-- JSでvisual.yamlデータから動的生成 -->
+            </div>
+          </div>
+
+          <!-- 制作クレジット情報 (visual.yaml の各項目) -->
+          <div class="visual-credits-box" id="visual-credits">
+            <div class="credits-title">✦ CREATIVE CREDITS ✦</div>
+            <dl class="credits-list" id="credits-list">
+              <div class="credit-row">
+                <dt>キャラクターデザイン</dt>
+                <dd id="credit-characterDesign">星空 イラスト</dd>
+              </div>
+              <div class="credit-row">
+                <dt>イラストレーター</dt>
+                <dd id="credit-illustrator">星空 イラスト</dd>
+              </div>
+              <div class="credit-row">
+                <dt>Live2Dモデラー</dt>
+                <dd id="credit-live2d">スタジオ・モデリング</dd>
+              </div>
+              <div class="credit-row" id="credit-row-3d">
+                <dt>3Dモデラー</dt>
+                <dd id="credit-3dModeling">3Dクラフト Lab</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- プロフィールテキスト・基本情報エリア -->
+      <div class="hero-info-col">
+        <!-- ネームヘッダー -->
+        <div class="profile-header">
+          <div class="profile-rubies">
+            <span class="profile-furigana" id="prof-pronunciation">ほしの るな</span>
+            <span class="profile-roman" id="prof-romanization">Luna Hoshino</span>
+          </div>
+          <h1 class="profile-name" id="prof-name">星乃 ルナ</h1>
+          <div class="profile-nickname-badge">
+            <span class="label">Nickname</span>
+            <span class="value" id="prof-nickname">るなち / ルナちゃん</span>
+          </div>
+        </div>
+
+        <!-- キャッチフレーズ (comment) -->
+        <div class="profile-tagline" id="prof-comment">
+          夜空からあなたの心に星の光をお届け！見習い星読みバーチャルナビゲーター✨
+        </div>
+
+        <!-- 自己紹介文 (message) -->
+        <div class="profile-message-box">
+          <p id="prof-message">
+            はじめまして！星乃ルナです🌟<br>
+            普段はYouTubeを中心に、ゲーム実況や歌枠、まったり雑談、作業用ASMR配信などを楽しくお届けしています。<br>
+            みんなと一緒にあたたかい居場所を作っていけたら嬉しいです！チャンネル登録・SNSフォローよろしくね！
+          </p>
+        </div>
+
+        <!-- プロフィールスペック（グリッドカード） -->
+        <div class="profile-specs-grid">
+          <div class="spec-card">
+            <span class="spec-icon">🎂</span>
+            <div class="spec-meta">
+              <span class="spec-label">誕生日</span>
+              <strong class="spec-value" id="prof-birthday">07月15日</strong>
+            </div>
+          </div>
+          <div class="spec-card">
+            <span class="spec-icon">🚀</span>
+            <div class="spec-meta">
+              <span class="spec-label">活動開始日</span>
+              <strong class="spec-value" id="prof-streaming">2023年10月01日</strong>
+            </div>
+          </div>
+          <div class="spec-card">
+            <span class="spec-icon">✨</span>
+            <div class="spec-meta">
+              <span class="spec-label">年齢</span>
+              <strong class="spec-value"><span id="prof-age">18</span> 歳</strong>
+            </div>
+          </div>
+          <div class="spec-card">
+            <span class="spec-icon">📏</span>
+            <div class="spec-meta">
+              <span class="spec-label">身長</span>
+              <strong class="spec-value"><span id="prof-height">152</span> cm</strong>
+            </div>
+          </div>
+          <div class="spec-card spec-full">
+            <span class="spec-icon">💫</span>
+            <div class="spec-meta">
+              <span class="spec-label">ファンネーム</span>
+              <strong class="spec-value" id="prof-fanName">ステラメイト</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- SNS & プラットフォームリンク -->
+        <div class="profile-channels">
+          <div class="channel-title">✦ OFFICIAL CHANNELS & PLATFORMS ✦</div>
+          <div class="channel-buttons" id="prof-platforms">
+            <!-- YouTube メイン -->
+            <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="channel-link yt-link" id="prof-youtube">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              <span>YouTube Channel</span>
+            </a>
+            <!-- X (Twitter) -->
+            <a href="https://x.com/" target="_blank" rel="noopener noreferrer" class="channel-link x-link" id="prof-x">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              <span>Official X</span>
+            </a>
+            <!-- その他 platforms (最大3つ) はJSで追加 -->
+          </div>
+        </div>
+
+        <!-- 自己紹介動画 (moves: array max 3) -->
+        <div class="profile-intro-moves" id="prof-moves-box">
+          <div class="moves-label">✦ INTRO MOVIES ✦</div>
+          <div class="moves-btn-group" id="prof-moves-buttons">
+            <!-- JSで動的にボタン生成 -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       動的セクションコンテナ
+       （管理画面から順番の入れ替え・表示非表示が行える要素群）
+  ============================================================ -->
+  <main id="section-container" class="sections-container">
+
+    <!-- ------------------------------------------------------------
+         1. お知らせセクション (schema/notice.yaml)
+    ------------------------------------------------------------- -->
+    <section id="sec-notice" class="lp-section notice-section" data-section-id="notice">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-subtitle">Information</span>
+          <h2 class="section-title">お知らせ</h2>
+          <div class="title-line"></div>
+        </div>
+
+        <div class="notice-list" id="notice-container">
+          <!-- JSでnotice.yaml準拠のデータをレンダリング -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         2. スケジュールセクション (schema/scheduleTag.yaml & schedule.yaml)
+    ------------------------------------------------------------- -->
+    <section id="sec-schedule" class="lp-section schedule-section" data-section-id="schedule">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-subtitle">Calendar & Events</span>
+          <h2 class="section-title">配信・イベントスケジュール</h2>
+          <div class="title-line"></div>
+        </div>
+
+        <!-- scheduleTag フィルタリングタブ -->
+        <div class="filter-tabs" id="schedule-filter-tabs">
+          <button class="filter-tab active" data-tag-id="all">すべて</button>
+          <!-- JSで動的生成 -->
+        </div>
+
+        <!-- スケジュールカード一覧 -->
+        <div class="schedule-grid" id="schedule-container">
+          <!-- JSでschedule.yaml準拠のデータをレンダリング -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         3. ギャラリーセクション (schema/gallery.yaml)
+    ------------------------------------------------------------- -->
+    <section id="sec-gallery" class="lp-section gallery-section" data-section-id="gallery">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-subtitle">Visual Archive</span>
+          <h2 class="section-title">ギャラリー</h2>
+          <p class="section-desc">三面図や設定資料、記念イラストなどのアーカイブです</p>
+          <div class="title-line"></div>
+        </div>
+
+        <!-- ギャラリー画像グリッド -->
+        <div class="gallery-grid" id="gallery-container">
+          <!-- JSでgallery.yaml準拠のデータをレンダリング -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         4. 動画リストセクション (schema/movieLabel.yaml & movie.yaml)
+    ------------------------------------------------------------- -->
+    <section id="sec-movie" class="lp-section movie-section" data-section-id="movie">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-subtitle">YouTube Archive</span>
+          <h2 class="section-title">動画リスト</h2>
+          <div class="title-line"></div>
+        </div>
+
+        <!-- movieLabel フィルタリングタブ -->
+        <div class="filter-tabs" id="movie-filter-tabs">
+          <button class="filter-tab active" data-label-id="all">すべて</button>
+          <!-- JSで動的生成 -->
+        </div>
+
+        <!-- 動画カード一覧 -->
+        <div class="movie-grid" id="movie-container">
+          <!-- JSでmovie.yaml準拠のデータをレンダリング -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         5. ショップリストセクション (schema/shopTag.yaml & shop.yaml)
+    ------------------------------------------------------------- -->
+    <section id="sec-shop" class="lp-section shop-section" data-section-id="shop">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-subtitle">Official Goods</span>
+          <h2 class="section-title">ショップリスト</h2>
+          <p class="section-desc">公式グッズ、記念アイテム、デジタルコンテンツはこちら</p>
+          <div class="title-line"></div>
+        </div>
+
+        <!-- shopTag フィルタリングタブ -->
+        <div class="filter-tabs" id="shop-filter-tabs">
+          <button class="filter-tab active" data-shop-tag="all">すべて</button>
+          <!-- JSで動的生成 -->
+        </div>
+
+        <!-- 商品カードグリッド -->
+        <div class="shop-grid" id="shop-container">
+          <!-- JSでshop.yaml準拠のデータをレンダリング -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         6. リンクリストセクション (schema/linkList.yaml)
+    ------------------------------------------------------------- -->
+    <section id="sec-linkList" class="lp-section link-section" data-section-id="linkList">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-subtitle">Official Links</span>
+          <h2 class="section-title">リンクリスト</h2>
+          <div class="title-line"></div>
+        </div>
+
+        <!-- リンクカード一覧 -->
+        <div class="link-grid" id="link-container">
+          <!-- JSでlinkList.yaml準拠のデータをレンダリング -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       フッター
+  ============================================================ -->
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-brand">
+        <span class="brand-name">星乃ルナ Official Web</span>
+        <p class="brand-desc">見習い星読みバーチャルナビゲーター</p>
+      </div>
+      <div class="footer-copy">
+        <p>&copy; 2026 Luna Hoshino. All Rights Reserved.</p>
+      </div>
+      <a href="#sec-profile" class="back-to-top" aria-label="トップへ戻る">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
+      </a>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       モーダル群（画像Lightbox / 動画プレイヤー）
+  ============================================================ -->
+  <!-- 画像拡大モーダル -->
+  <div class="modal-overlay" id="image-modal" aria-hidden="true">
+    <div class="modal-backdrop" id="image-modal-backdrop"></div>
+    <div class="modal-content image-modal-content">
+      <button class="modal-close" id="image-modal-close" aria-label="閉じる">&times;</button>
+      <img src="" alt="" id="image-modal-img">
+      <div class="modal-caption" id="image-modal-caption"></div>
+    </div>
+  </div>
+
+  <!-- 動画再生モーダル -->
+  <div class="modal-overlay" id="video-modal" aria-hidden="true">
+    <div class="modal-backdrop" id="video-modal-backdrop"></div>
+    <div class="modal-content video-modal-content">
+      <button class="modal-close" id="video-modal-close" aria-label="閉じる">&times;</button>
+      <div class="video-iframe-wrapper">
+        <iframe src="" id="video-modal-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      </div>
+      <div class="modal-caption" id="video-modal-title"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       管理画面連携用：セクション並び替え＆表示切り替えコントローラー
+       （後から作る管理画面との連携検証用プレビューUI）
+  ============================================================ -->
+  <div class="admin-preview-dock" id="admin-preview-dock">
+    <!-- トグルボタン -->
+    <button class="admin-dock-toggle" id="admin-dock-toggle" title="管理シミュレータ：要素の並び替え・表示非表示設定">
+      <span class="icon">⚙️</span>
+      <span class="label">セクション並替・表示切替</span>
+    </button>
+
+    <!-- 管理操作パネル -->
+    <div class="admin-panel" id="admin-panel">
+      <div class="admin-panel-header">
+        <div class="header-title">
+          <span class="icon">⚙️</span>
+          <strong>セクション管理プレビュー</strong>
+        </div>
+        <button class="admin-panel-close" id="admin-panel-close">&times;</button>
+      </div>
+
+      <div class="admin-panel-body">
+        <p class="admin-instruction">
+          後から作る管理画面で行う<strong>「表示・非表示の切り替え」</strong>と<strong>「並び順の入れ替え（↑ / ↓）」</strong>をリアルタイムにテストできます。
+        </p>
+
+        <div class="admin-section-list" id="admin-section-list">
+          <!-- JSで動的生成：各セクションのチェックボックスと上下移動ボタン -->
+        </div>
+
+        <div class="admin-api-config">
+          <div class="admin-config-label">Cloudflare Workers API URL</div>
+          <div class="admin-api-input-group">
+            <input type="text" id="api-url-input" placeholder="http://127.0.0.1:8787 または 空欄(同一オリジン)">
+            <button class="btn-save-api" id="btn-save-api">保存して再取得</button>
+          </div>
+          <small class="admin-api-help">空欄の場合は <code>/api/all</code> を直接参照します</small>
+        </div>
+
+        <div class="admin-actions">
+          <button class="btn-admin-reset" id="btn-admin-reset">初期順序に戻す</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="js/main.js"></script>
+</body>
+</html>
+

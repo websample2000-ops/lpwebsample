@@ -1,0 +1,99 @@
+profile:
+    title: "プロフィール"
+    headerRow: 1
+    dataStartRow: 2
+    columns:
+        name:
+            type: string
+            description: "名前"
+            required: true
+
+        pronunciation:
+            type: string
+            description: "名前(ふりがな)"
+            required: false
+
+        romanization:
+            type: string
+            description: "名前(ローマ字)"
+            required: false
+
+        nickname:
+            type: string
+            description: "ニックネーム"
+            required: false
+
+        comment:
+            type: text
+            description: "キャッチフレーズ"
+            required: false
+
+        message:
+            type: text
+            description: "自己紹介"
+            required: false
+
+        birthday:
+            label: "誕生日"
+            type: date
+            format: "MM月DD日"
+            description: "誕生日 表示形式：mm月dd日"
+            required: false
+
+        streaming:
+            label: "活動開始日"
+            type: date
+            format: "yyyy年mm月dd日"
+            description: "活動開始日 表示形式：yyyy年mm月dd日"
+            required: false
+
+        age:
+            label: "年齢"
+            type: number
+            description: "年齢"
+            required: false
+
+        height:
+            label: "身長"
+            type: number
+            description: "身長"
+            required: false
+
+        fanName:
+            label: "ファンネーム"
+            type: string
+            description: "ファンネーム"
+            required: false
+
+        youtubeUrl:
+            type: url
+            description: "YouTubeチャンネルのURL"
+            required: false
+
+        xUrl:
+            type: url
+            description: "XのURL"
+            required: false
+
+        platforms:
+            type: array
+            description: "プラットフォームのリンク"
+            max: 3
+            items:
+                properties:
+                    name:
+                        type: string
+                        description: "プラットフォームの名称"
+                        default: null
+                    link:
+                        type: url
+                        description: "プラットフォームのURL"
+                required:
+                    - link
+
+        moves:
+            type: array
+            max: 3
+            items:
+                type: url
+                description: "自己紹介用動画URL"

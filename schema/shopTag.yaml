@@ -1,0 +1,14 @@
+shopTag:
+  title: "ショップ区分"
+  headerRow: 1
+  dataStartRow: 2
+  columns:
+    id:
+      type: number
+      description: "管理用番号"
+      required: true
+    
+    tagName:
+      type: string
+      description: "区分ラベル名"
+      required: true

@@ -1,0 +1,34 @@
+notice:
+  title: "お知らせ"
+  headerRow: 1
+  dataStartRow: 2
+  columns:
+    created_at:
+      type: datetime
+      description: "送信（作成）時刻"
+      default: "CURRENT_TIMESTAMP"
+
+    scheduled_at:
+      type: datetime
+      description: "予約投稿時刻（未設定時は即時公開）"
+      required: true
+      default: null
+
+    status:
+      type: string
+      description: "公開ステータス"
+      enum:
+        published: "公開"
+        scheduled: "予約"
+        draft: "下書き"
+      default: "published"
+
+    message:
+      type: text
+      description: "お知らせ本文"
+      required: true
+
+    picture:
+      type: url
+      description: "添付画像や動画"
+      required: false

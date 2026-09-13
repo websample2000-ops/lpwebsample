@@ -1,0 +1,46 @@
+movie:
+  title: "動画"
+  headerRow: 1
+  dataStartRow: 2
+  columns:
+    id:
+      type: number
+      description: "管理用番号"
+      required: true
+      
+    tagLabel:
+      type: string
+      description: "動画の区分け用ラベル"
+      references:
+        table: "movieLabel"
+        field: "id"
+        display: "tagLabel"
+      required: true
+
+    title:
+      type: string
+      description: "動画タイトル"
+      required: true
+
+    imageUrl:
+      type: image
+      description: "サムネイル用画像URL（未入力の場合、動画のサムネイルで表示）"
+      source_type:
+        enum:
+          upload: "アップロード"
+          select: "画像選択"
+        default: "upload"
+      mediaLibrary: "asset/movieImage"
+      uploadPath: "asset/movieImage"
+      required: false
+
+    videoUrl:
+      type: url
+      description: "動画のURL"
+      required: true
+    
+    is_active:
+      type: boolean
+      description: "表示フラグ（true: 表示 / false: 非表示）"
+      default: true
+      required: true
