@@ -894,6 +894,8 @@ async function initApp() {
 
   } catch (err) {
     console.warn('[D1 API Warning]:', err);
+    // エラー時はフォールバックデータで表示
+    applyAllData(FALLBACK_SCHEMA_DATA);
     if (typeof FALLBACK_SCHEMA_DATA !== 'undefined') {
       applyAllData(FALLBACK_SCHEMA_DATA);
     }
