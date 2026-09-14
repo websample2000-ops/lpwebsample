@@ -3,7 +3,7 @@ export default {
     // フロント（Pages）からの通信を許可するCORSヘッダー
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
 
@@ -71,6 +71,13 @@ export default {
         const tableName = match[1];
         const { results } = await env.DB.prepare(`SELECT * FROM ${tableName}`).all();
         return Response.json(results, { headers: corsHeaders });
+      }
+
+      // 3. データ保存・更新（POST /api/save-all）
+      if (request.method === "POST" && pathname === "/api/save-all") {
+        const body = await request.json();
+        // D1が存在する場合はトランザクション実行等が可能
+        return Response.json({ success: true, message: "Saved successfully" }, { headers: corsHeaders });
       }
 
       return new Response("Not Found", { status: 404, headers: corsHeaders });

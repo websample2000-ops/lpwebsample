@@ -360,7 +360,7 @@
         <p class="brand-desc">見習い星読みバーチャルナビゲーター</p>
       </div>
       <div class="footer-copy">
-        <p>&copy; 2026 Luna Hoshino. All Rights Reserved.</p>
+        <p>&copy; 2026 Luna Hoshino. All Rights Reserved. <a href="admin.html" class="footer-admin-link" style="margin-left: 12px; opacity: 0.6; font-size: 0.85em; text-decoration: underline;" title="管理画面へ">⚙️ 管理コンソール</a></p>
       </div>
       <a href="#sec-profile" class="back-to-top" aria-label="トップへ戻る">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
@@ -390,52 +390,6 @@
         <iframe src="" id="video-modal-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
       </div>
       <div class="modal-caption" id="video-modal-title"></div>
-    </div>
-  </div>
-
-  <!-- ============================================================
-       管理画面連携用：セクション並び替え＆表示切り替えコントローラー
-       （後から作る管理画面との連携検証用プレビューUI）
-  ============================================================ -->
-  <div class="admin-preview-dock" id="admin-preview-dock">
-    <!-- トグルボタン -->
-    <button class="admin-dock-toggle" id="admin-dock-toggle" title="管理シミュレータ：要素の並び替え・表示非表示設定">
-      <span class="icon">⚙️</span>
-      <span class="label">セクション並替・表示切替</span>
-    </button>
-
-    <!-- 管理操作パネル -->
-    <div class="admin-panel" id="admin-panel">
-      <div class="admin-panel-header">
-        <div class="header-title">
-          <span class="icon">⚙️</span>
-          <strong>セクション管理プレビュー</strong>
-        </div>
-        <button class="admin-panel-close" id="admin-panel-close">&times;</button>
-      </div>
-
-      <div class="admin-panel-body">
-        <p class="admin-instruction">
-          後から作る管理画面で行う<strong>「表示・非表示の切り替え」</strong>と<strong>「並び順の入れ替え（↑ / ↓）」</strong>をリアルタイムにテストできます。
-        </p>
-
-        <div class="admin-section-list" id="admin-section-list">
-          <!-- JSで動的生成：各セクションのチェックボックスと上下移動ボタン -->
-        </div>
-
-        <div class="admin-api-config">
-          <div class="admin-config-label">Cloudflare Workers API URL</div>
-          <div class="admin-api-input-group">
-            <input type="text" id="api-url-input" placeholder="http://127.0.0.1:8787 または 空欄(同一オリジン)">
-            <button class="btn-save-api" id="btn-save-api">保存して再取得</button>
-          </div>
-          <small class="admin-api-help">空欄の場合は <code>/api/all</code> を直接参照します</small>
-        </div>
-
-        <div class="admin-actions">
-          <button class="btn-admin-reset" id="btn-admin-reset">初期順序に戻す</button>
-        </div>
-      </div>
     </div>
   </div>
 

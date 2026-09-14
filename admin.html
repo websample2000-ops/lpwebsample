@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理コンソール | 星乃ルナ Official LP</title>
+  <meta name="robots" content="noindex,nofollow">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       ヘッダー
+  ============================================================ -->
+  <header class="admin-header">
+    <div class="header-left">
+      <!-- ハンバーガーメニューボタン -->
+      <button class="btn-hamburger" id="btn-hamburger" aria-label="メニュー開閉" title="メニュー切替">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <div class="admin-logo">
+        <span class="admin-logo-symbol">✦</span>
+        <span>星乃ルナ LP 管理画面</span>
+      </div>
+      <span class="admin-badge">Admin</span>
+    </div>
+
+    <div class="header-right">
+      <button class="btn-reset-data" id="btn-reload-api" title="Workers APIからデータを再取得">
+        🔄 API再取得
+      </button>
+      <a href="index.html" target="_blank" class="btn-view-lp">
+        <span>サイトを表示</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- モバイル用サイドバーオーバーレイ -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- ============================================================
+       サイドバー（ハンバーガーメニューでトグル・切り替え）
+  ============================================================ -->
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="sidebar-menu">
+      <div class="menu-category-title">コンテンツ管理</div>
+      
+      <!-- 1. プロフィール（編集のみ）: デフォルトアクティブ -->
+      <button class="nav-link-btn active" data-section="profile">
+        <div class="btn-inner">
+          <span class="icon">👤</span>
+          <span>プロフィール</span>
+        </div>
+        <span class="badge-pill">編集のみ</span>
+      </button>
+
+      <!-- 2. 立ち絵（編集と追加） -->
+      <button class="nav-link-btn" data-section="visual">
+        <div class="btn-inner">
+          <span class="icon">👗</span>
+          <span>立ち絵・衣装</span>
+        </div>
+        <span class="badge-pill" id="badge-visual">0</span>
+      </button>
+
+      <!-- 3. お知らせ（編集と追加） -->
+      <button class="nav-link-btn" data-section="notice">
+        <div class="btn-inner">
+          <span class="icon">📢</span>
+          <span>お知らせ</span>
+        </div>
+        <span class="badge-pill" id="badge-notice">0</span>
+      </button>
+
+      <!-- 4. スケジュール（編集と追加） -->
+      <button class="nav-link-btn" data-section="schedule">
+        <div class="btn-inner">
+          <span class="icon">📅</span>
+          <span>スケジュール</span>
+        </div>
+        <span class="badge-pill" id="badge-schedule">0</span>
+      </button>
+
+      <!-- 5. ギャラリー（編集と追加） -->
+      <button class="nav-link-btn" data-section="gallery">
+        <div class="btn-inner">
+          <span class="icon">🖼️</span>
+          <span>ギャラリー</span>
+        </div>
+        <span class="badge-pill" id="badge-gallery">0</span>
+      </button>
+
+      <!-- 6. 動画リスト（編集と追加） -->
+      <button class="nav-link-btn" data-section="movie">
+        <div class="btn-inner">
+          <span class="icon">🎬</span>
+          <span>動画リスト</span>
+        </div>
+        <span class="badge-pill" id="badge-movie">0</span>
+      </button>
+
+      <!-- 7. ショップ（編集と追加） -->
+      <button class="nav-link-btn" data-section="shop">
+        <div class="btn-inner">
+          <span class="icon">🛍️</span>
+          <span>ショップリスト</span>
+        </div>
+        <span class="badge-pill" id="badge-shop">0</span>
+      </button>
+
+      <!-- 8. リンクリスト（編集と追加） -->
+      <button class="nav-link-btn" data-section="linkList">
+        <div class="btn-inner">
+          <span class="icon">🔗</span>
+          <span>リンクリスト</span>
+        </div>
+        <span class="badge-pill" id="badge-linkList">0</span>
+      </button>
+
+      <div class="menu-category-title" style="margin-top:12px;">レイアウト設定</div>
+
+      <!-- 9. セクション切り替え・表示切替（indexから移設） -->
+      <button class="nav-link-btn" data-section="sectionSettings">
+        <div class="btn-inner">
+          <span class="icon">⚙️</span>
+          <span>セクション並替・表示切替</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- サイドバーフッター（エクスポート機能） -->
+    <div class="sidebar-footer">
+      <button class="btn-export-json" id="btn-export-json">
+        <span>💾 JSONエクスポート</span>
+      </button>
+      <button class="btn-export-sql" id="btn-export-sql">
+        <span>📄 D1 SQLエクスポート</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       メインコンテンツ領域
+  ============================================================ -->
+  <main class="admin-main" id="admin-main">
+
+    <!-- ------------------------------------------------------------
+         1. プロフィール（profile）: 編集のみ [デフォルト表示]
+    ------------------------------------------------------------- -->
+    <section class="admin-section active" id="sec-profile">
+      <div class="section-top-bar">
+        <div class="section-title-group">
+          <h2>👤 プロフィール設定</h2>
+          <p>名前、自己紹介、基本スペック、SNS等の公式チャンネルリンクを編集します。（単一データ編集）</p>
+        </div>
+      </div>
+
+      <form id="form-profile" class="content-card">
+        <h3 class="card-title">基本情報</h3>
+        <div class="form-grid cols-2">
+          <div class="form-group">
+            <label class="form-label" for="prof-name">名前 <span class="req-tag">必須</span></label>
+            <input type="text" id="prof-name" class="form-input" required placeholder="例: 星乃 ルナ">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prof-pronunciation">名前（ふりがな）</label>
+            <input type="text" id="prof-pronunciation" class="form-input" placeholder="例: ほしの るな">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prof-romanization">名前（ローマ字）</label>
+            <input type="text" id="prof-romanization" class="form-input" placeholder="例: Luna Hoshino">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prof-nickname">ニックネーム</label>
+            <input type="text" id="prof-nickname" class="form-input" placeholder="例: るなち / ルナちゃん">
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="prof-comment">キャッチフレーズ</label>
+            <input type="text" id="prof-comment" class="form-input" placeholder="例: 夜空からあなたの心に星の光をお届け！見習い星読みバーチャルナビゲーター✨">
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="prof-message">自己紹介メッセージ</label>
+            <textarea id="prof-message" class="form-textarea" rows="4" placeholder="自己紹介メッセージを入力"></textarea>
+          </div>
+        </div>
+
+        <h3 class="card-title" style="margin-top:28px;">スペック情報</h3>
+        <div class="form-grid cols-3">
+          <div class="form-group">
+            <label class="form-label" for="prof-birthday">誕生日</label>
+            <input type="text" id="prof-birthday" class="form-input" placeholder="例: 07月15日">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prof-streaming">活動開始日</label>
+            <input type="text" id="prof-streaming" class="form-input" placeholder="例: 2023年10月01日">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prof-fanName">ファンネーム</label>
+            <input type="text" id="prof-fanName" class="form-input" placeholder="例: ステラメイト">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prof-age">年齢</label>
+            <input type="text" id="prof-age" class="form-input" placeholder="例: 18">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prof-height">身長 (cm)</label>
+            <input type="text" id="prof-height" class="form-input" placeholder="例: 152">
+          </div>
+        </div>
+
+        <h3 class="card-title" style="margin-top:28px;">SNS・公式チャンネルリンク</h3>
+        <div class="form-grid cols-2">
+          <div class="form-group">
+            <label class="form-label" for="prof-youtubeUrl">YouTube チャンネルURL</label>
+            <input type="url" id="prof-youtubeUrl" class="form-input" placeholder="https://www.youtube.com/@channel">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prof-xUrl">X (Twitter) URL</label>
+            <input type="url" id="prof-xUrl" class="form-input" placeholder="https://x.com/username">
+          </div>
+          
+          <!-- プラットフォーム 1〜3 -->
+          <div class="form-group">
+            <label class="form-label">追加プラットフォーム 1 (名称 / URL)</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="prof-plat-name-1" class="form-input" style="width:40%;" placeholder="名称">
+              <input type="url" id="prof-plat-link-1" class="form-input" style="width:60%;" placeholder="https://...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">追加プラットフォーム 2 (名称 / URL)</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="prof-plat-name-2" class="form-input" style="width:40%;" placeholder="名称">
+              <input type="url" id="prof-plat-link-2" class="form-input" style="width:60%;" placeholder="https://...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">追加プラットフォーム 3 (名称 / URL)</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="prof-plat-name-3" class="form-input" style="width:40%;" placeholder="名称">
+              <input type="url" id="prof-plat-link-3" class="form-input" style="width:60%;" placeholder="https://...">
+            </div>
+          </div>
+        </div>
+
+        <h3 class="card-title" style="margin-top:28px;">自己紹介動画 (YouTube URL 最大3件)</h3>
+        <div class="form-grid cols-3">
+          <div class="form-group">
+            <label class="form-label" for="prof-move-1">動画 1 URL</label>
+            <input type="url" id="prof-move-1" class="form-input" placeholder="https://youtu.be/...">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prof-move-2">動画 2 URL</label>
+            <input type="url" id="prof-move-2" class="form-input" placeholder="https://youtu.be/...">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prof-move-3">動画 3 URL</label>
+            <input type="url" id="prof-move-3" class="form-input" placeholder="https://youtu.be/...">
+          </div>
+        </div>
+
+        <div class="form-submit-row">
+          <button type="submit" class="btn-primary">
+            <span>💾 プロフィールを保存</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         2. 立ち絵（visual）: 編集と追加
+    ------------------------------------------------------------- -->
+    <section class="admin-section" id="sec-visual">
+      <div class="section-top-bar">
+        <div class="section-title-group">
+          <h2>👗 立ち絵・衣装設定</h2>
+          <p>サイト最上部に表示する立ち絵、衣装差分、制作クレジットを管理します。（編集と追加）</p>
+        </div>
+        <div class="section-top-actions">
+          <button class="btn-primary" onclick="openVisualModal()">＋ 新規立ち絵を追加</button>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>サムネイル</th>
+                <th>衣装名</th>
+                <th>クレジット (絵/Live2D)</th>
+                <th>表示順</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="visual-table-body">
+              <!-- JSで動的生成 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         3. お知らせ（notice）: 編集と追加
+    ------------------------------------------------------------- -->
+    <section class="admin-section" id="sec-notice">
+      <div class="section-top-bar">
+        <div class="section-title-group">
+          <h2>📢 お知らせ管理</h2>
+          <p>ファンへのお知らせ投稿、公開ステータス、添付画像を管理します。（編集と追加）</p>
+        </div>
+        <div class="section-top-actions">
+          <button class="btn-primary" onclick="openNoticeModal()">＋ 新規お知らせを追加</button>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>投稿日時</th>
+                <th>ステータス</th>
+                <th>本文</th>
+                <th>画像</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="notice-table-body">
+              <!-- JSで動的生成 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         4. スケジュール（scheduleTag, schedule）: 編集と追加
+    ------------------------------------------------------------- -->
+    <section class="admin-section" id="sec-schedule">
+      <div class="section-top-bar">
+        <div class="section-title-group">
+          <h2>📅 スケジュール管理</h2>
+          <p>配信やイベント予定、およびタグ区分を管理します。（編集と追加）</p>
+        </div>
+        <div class="section-top-actions">
+          <button class="btn-primary" onclick="openScheduleModal()">＋ 新規スケジュールを追加</button>
+        </div>
+      </div>
+
+      <!-- タグ区分管理エリア -->
+      <div class="content-card" style="margin-bottom:20px;">
+        <h3 class="card-title">区分タグ (scheduleTag)</h3>
+        <div style="display:flex; gap:10px; max-width:400px;">
+          <input type="text" id="new-schedule-tag-name" class="form-input" placeholder="新しいタグ名（例: 歌枠、大会）">
+          <button type="button" class="btn-secondary" id="btn-add-schedule-tag">追加</button>
+        </div>
+        <div class="tag-badge-group" id="schedule-tags-list">
+          <!-- JSで動的生成 -->
+        </div>
+      </div>
+
+      <!-- スケジュール一覧 -->
+      <div class="content-card">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>日時</th>
+                <th>タグ</th>
+                <th>タイトル</th>
+                <th>公開状態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="schedule-table-body">
+              <!-- JSで動的生成 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         5. ギャラリー（gallery）: 編集と追加
+    ------------------------------------------------------------- -->
+    <section class="admin-section" id="sec-gallery">
+      <div class="section-top-bar">
+        <div class="section-title-group">
+          <h2>🖼️ ギャラリー管理</h2>
+          <p>三面図や記念イラスト、設定資料等の画像アーカイブを管理します。（編集と追加）</p>
+        </div>
+        <div class="section-top-actions">
+          <button class="btn-primary" onclick="openGalleryModal()">＋ 新規ギャラリー画像を追加</button>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-grid" id="gallery-grid-list">
+          <!-- JSで動的生成 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         6. 動画リスト（movieLabel, movie）: 編集と追加
+    ------------------------------------------------------------- -->
+    <section class="admin-section" id="sec-movie">
+      <div class="section-top-bar">
+        <div class="section-title-group">
+          <h2>🎬 動画リスト管理</h2>
+          <p>YouTube動画やアーカイブ、動画ラベル区分を管理します。（編集と追加）</p>
+        </div>
+        <div class="section-top-actions">
+          <button class="btn-primary" onclick="openMovieModal()">＋ 新規動画を追加</button>
+        </div>
+      </div>
+
+      <!-- 動画区分ラベル管理 -->
+      <div class="content-card" style="margin-bottom:20px;">
+        <h3 class="card-title">動画区分ラベル (movieLabel)</h3>
+        <div style="display:flex; gap:10px; max-width:400px;">
+          <input type="text" id="new-movie-label-name" class="form-input" placeholder="新しいラベル名（例: 切り抜き、ASMR）">
+          <button type="button" class="btn-secondary" id="btn-add-movie-label">追加</button>
+        </div>
+        <div class="tag-badge-group" id="movie-labels-list">
+          <!-- JSで動的生成 -->
+        </div>
+      </div>
+
+      <!-- 動画一覧 -->
+      <div class="content-card">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>サムネイル</th>
+                <th>タイトル</th>
+                <th>区分ラベル</th>
+                <th>動画URL</th>
+                <th>状態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="movie-table-body">
+              <!-- JSで動的生成 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         7. ショップ（shopTag, shop）: 編集と追加
+    ------------------------------------------------------------- -->
+    <section class="admin-section" id="sec-shop">
+      <div class="section-top-bar">
+        <div class="section-title-group">
+          <h2>🛍️ ショップリスト管理</h2>
+          <p>公式グッズ、ボイス、楽曲等の商品情報と各通販サイトURLを管理します。（編集と追加）</p>
+        </div>
+        <div class="section-top-actions">
+          <button class="btn-primary" onclick="openShopModal()">＋ 新規商品を追加</button>
+        </div>
+      </div>
+
+      <!-- 商品区分タグ管理 -->
+      <div class="content-card" style="margin-bottom:20px;">
+        <h3 class="card-title">商品区分タグ (shopTag)</h3>
+        <div style="display:flex; gap:10px; max-width:400px;">
+          <input type="text" id="new-shop-tag-name" class="form-input" placeholder="新しい区分名（例: 限定グッズ、記念品）">
+          <button type="button" class="btn-secondary" id="btn-add-shop-tag">追加</button>
+        </div>
+        <div class="tag-badge-group" id="shop-tags-list">
+          <!-- JSで動的生成 -->
+        </div>
+      </div>
+
+      <!-- 商品一覧 -->
+      <div class="content-card">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>商品画像</th>
+                <th>商品名</th>
+                <th>区分</th>
+                <th>価格</th>
+                <th>表示順</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="shop-table-body">
+              <!-- JSで動的生成 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         8. リンクリスト（linkList）: 編集と追加
+    ------------------------------------------------------------- -->
+    <section class="admin-section" id="sec-linkList">
+      <div class="section-top-bar">
+        <div class="section-title-group">
+          <h2>🔗 リンクリスト管理</h2>
+          <p>関連リンク、ガイドライン、ファンレター宛先等のリンクボタンを管理します。（編集と追加）</p>
+        </div>
+        <div class="section-top-actions">
+          <button class="btn-primary" onclick="openLinkListModal()">＋ 新規リンクを追加</button>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>タイトル</th>
+                <th>バナー画像</th>
+                <th>リンク先URL</th>
+                <th>表示順</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="linkList-table-body">
+              <!-- JSで動的生成 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------
+         9. セクション並替・表示切替（indexから移設）
+    ------------------------------------------------------------- -->
+    <section class="admin-section" id="sec-sectionSettings">
+      <div class="section-top-bar">
+        <div class="section-title-group">
+          <h2>⚙️ セクション並び替え・表示切り替え</h2>
+          <p>LP（index.html）の各セクションの表示/非表示、および縦の並び順を自由に設定できます。</p>
+        </div>
+        <div class="section-top-actions">
+          <button class="btn-secondary" id="btn-reset-section-config">初期順序に戻す</button>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:20px;">
+          チェックボックスで<strong>「表示・非表示」</strong>を切り替え、▲/▼ボタンで<strong>「セクションの配置順序」</strong>を変更できます。設定は即座にLPサイトに反映されます。
+        </p>
+
+        <div class="section-reorder-list" id="section-settings-list">
+          <!-- JSで動的生成 -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       モーダル群（新規追加・編集用ポップアップ）
+  ============================================================ -->
+
+  <!-- 1. 立ち絵モーダル -->
+  <div class="modal-wrapper" id="modal-visual">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-visual-title">立ち絵・衣装の編集</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-visual" class="form-grid cols-2">
+          <input type="hidden" id="visual-id">
+          <div class="form-group span-2">
+            <label class="form-label" for="visual-costumeName">衣装名 <span class="opt-tag">任意</span></label>
+            <input type="text" id="visual-costumeName" class="form-input" placeholder="例: 通常衣装（星空のローブ）">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="visual-visualUrl">立ち絵画像URL/ファイル名 <span class="req-tag">必須</span></label>
+            <input type="text" id="visual-visualUrl" class="form-input" required placeholder="visual_sample1.png">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="visual-thumdUrl">サムネイル画像URL/ファイル名 <span class="req-tag">必須</span></label>
+            <input type="text" id="visual-thumdUrl" class="form-input" required placeholder="thumd_sample1.png">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="visual-thumdBackground">サムネ背景画像 (任意)</label>
+            <input type="text" id="visual-thumdBackground" class="form-input" placeholder="thumdBackground_sample.png">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="visual-visualBackground">ページ背景画像 (任意)</label>
+            <input type="text" id="visual-visualBackground" class="form-input" placeholder="visualBackground_sample.png">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="visual-characterDesign">キャラクターデザイン</label>
+            <input type="text" id="visual-characterDesign" class="form-input" placeholder="例: 星空 イラスト">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="visual-illustrator">イラストレーター</label>
+            <input type="text" id="visual-illustrator" class="form-input" placeholder="例: 星空 イラスト">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="visual-live2d">Live2Dモデラー</label>
+            <input type="text" id="visual-live2d" class="form-input" placeholder="例: スタジオ・モデリング">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="visual-3dModeling">3Dモデラー</label>
+            <input type="text" id="visual-3dModeling" class="form-input" placeholder="例: 3Dクラフト Lab">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="visual-priority">表示優先度 (数値小が先)</label>
+            <input type="number" id="visual-priority" class="form-input" min="1" value="1">
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="visual-comment">管理用コメント</label>
+            <input type="text" id="visual-comment" class="form-input" placeholder="メモ">
+          </div>
+          <div class="form-submit-row span-2">
+            <button type="submit" class="btn-primary">保存する</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. お知らせモーダル -->
+  <div class="modal-wrapper" id="modal-notice">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-notice-title">お知らせの追加・編集</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-notice" class="form-grid cols-2">
+          <input type="hidden" id="notice-id">
+          <div class="form-group">
+            <label class="form-label" for="notice-created-at">作成日時 <span class="req-tag">必須</span></label>
+            <input type="text" id="notice-created-at" class="form-input" required placeholder="YYYY-MM-DD HH:MM">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="notice-status">公開ステータス</label>
+            <select id="notice-status" class="form-select">
+              <option value="published">公開 (published)</option>
+              <option value="scheduled">予約 (scheduled)</option>
+              <option value="draft">下書き (draft)</option>
+            </select>
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="notice-scheduled-at">予約公開日時 (任意)</label>
+            <input type="text" id="notice-scheduled-at" class="form-input" placeholder="YYYY-MM-DD HH:MM">
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="notice-message">お知らせ本文 <span class="req-tag">必須</span></label>
+            <textarea id="notice-message" class="form-textarea" rows="4" required placeholder="お知らせ内容を入力"></textarea>
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="notice-picture">添付画像URL (任意)</label>
+            <input type="text" id="notice-picture" class="form-input" placeholder="https://... またはファイル名">
+          </div>
+          <div class="form-submit-row span-2">
+            <button type="submit" class="btn-primary">保存する</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. スケジュールモーダル -->
+  <div class="modal-wrapper" id="modal-schedule">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-schedule-title">スケジュールの追加・編集</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-schedule" class="form-grid cols-2">
+          <input type="hidden" id="schedule-id">
+          <div class="form-group span-2">
+            <label class="form-label" for="schedule-title">タイトル <span class="req-tag">必須</span></label>
+            <input type="text" id="schedule-title" class="form-input" required placeholder="イベント・配信タイトル">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="schedule-tag-select">区分タグ <span class="req-tag">必須</span></label>
+            <select id="schedule-tag-select" class="form-select" required>
+              <!-- JSで動的生成 -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="schedule-date">日付 <span class="req-tag">必須</span></label>
+            <input type="date" id="schedule-date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="schedule-time">時間 (HH:MM)</label>
+            <input type="time" id="schedule-time" class="form-input">
+          </div>
+          <div class="form-group" style="display:flex; flex-direction:column; justify-content:center;">
+            <label class="form-label">表示フラグ</label>
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; margin-top:8px;">
+              <input type="checkbox" id="schedule-is-active" checked style="width:18px; height:18px;">
+              <span>サイト上に表示する</span>
+            </label>
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="schedule-detail">詳細内容</label>
+            <textarea id="schedule-detail" class="form-textarea" rows="3" placeholder="開催場所や告知文など"></textarea>
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="schedule-picture">添付画像URL (任意)</label>
+            <input type="text" id="schedule-picture" class="form-input" placeholder="画像URLまたはファイル名">
+          </div>
+          <div class="form-submit-row span-2">
+            <button type="submit" class="btn-primary">保存する</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ギャラリーモーダル -->
+  <div class="modal-wrapper" id="modal-gallery">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-gallery-title">ギャラリー画像の追加・編集</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-gallery" class="form-grid cols-2">
+          <input type="hidden" id="gallery-id">
+          <div class="form-group span-2">
+            <label class="form-label" for="gallery-name">タイトル・識別名</label>
+            <input type="text" id="gallery-name" class="form-input" placeholder="例: 三面図設定資料">
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="gallery-imageUrl">画像URL / ファイル名 <span class="req-tag">必須</span></label>
+            <input type="text" id="gallery-imageUrl" class="form-input" required placeholder="gallery_sample1.jpg または URL">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="gallery-priority">表示優先度 (数値小が先)</label>
+            <input type="number" id="gallery-priority" class="form-input" min="1" value="1">
+          </div>
+          <div class="form-submit-row span-2">
+            <button type="submit" class="btn-primary">保存する</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 動画モーダル -->
+  <div class="modal-wrapper" id="modal-movie">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-movie-title">動画の追加・編集</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-movie" class="form-grid cols-2">
+          <input type="hidden" id="movie-id">
+          <div class="form-group span-2">
+            <label class="form-label" for="movie-title">動画タイトル <span class="req-tag">必須</span></label>
+            <input type="text" id="movie-title" class="form-input" required placeholder="例: 【歌ってみた】星空のディスコ">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="movie-label-select">区分ラベル <span class="req-tag">必須</span></label>
+            <select id="movie-label-select" class="form-select" required>
+              <!-- JSで動的生成 -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">表示フラグ</label>
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; margin-top:8px;">
+              <input type="checkbox" id="movie-is-active" checked style="width:18px; height:18px;">
+              <span>公開する</span>
+            </label>
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="movie-videoUrl">動画URL (YouTube) <span class="req-tag">必須</span></label>
+            <input type="url" id="movie-videoUrl" class="form-input" required placeholder="https://www.youtube.com/watch?v=...">
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="movie-imageUrl">サムネイルURL (未入力の場合はYouTubeサムネを自動使用)</label>
+            <input type="text" id="movie-imageUrl" class="form-input" placeholder="カスタム画像URLまたはファイル名">
+          </div>
+          <div class="form-submit-row span-2">
+            <button type="submit" class="btn-primary">保存する</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ショップ商品モーダル -->
+  <div class="modal-wrapper" id="modal-shop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-shop-title">商品の追加・編集</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-shop" class="form-grid cols-2">
+          <input type="hidden" id="shop-id">
+          <div class="form-group span-2">
+            <label class="form-label" for="shop-name">商品名 <span class="req-tag">必須</span></label>
+            <input type="text" id="shop-name" class="form-input" required placeholder="例: アクリルスタンド">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="shop-tag-select">商品区分 <span class="req-tag">必須</span></label>
+            <select id="shop-tag-select" class="form-select" required>
+              <!-- JSで動的生成 -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="shop-price">価格 (円) <span class="req-tag">必須</span></label>
+            <input type="number" id="shop-price" class="form-input" required min="0" placeholder="1000">
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="shop-merchandiseImage">商品画像URL / ファイル名 <span class="req-tag">必須</span></label>
+            <input type="text" id="shop-merchandiseImage" class="form-input" required placeholder="sample_goods.png または URL">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="shop-priority">表示優先度</label>
+            <input type="number" id="shop-priority" class="form-input" min="1" value="1001">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="shop-booth">BOOTH 商品ページURL</label>
+            <input type="url" id="shop-booth" class="form-input" placeholder="https://booth.pm/...">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="shop-suzuri">SUZURI 商品ページURL</label>
+            <input type="url" id="shop-suzuri" class="form-input" placeholder="https://suzuri.jp/...">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="shop-base">BASE 商品ページURL</label>
+            <input type="url" id="shop-base" class="form-input" placeholder="https://...base.ec/">
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="shop-fanbox">FANBOX ページURL</label>
+            <input type="url" id="shop-fanbox" class="form-input" placeholder="https://...fanbox.cc/">
+          </div>
+          <div class="form-submit-row span-2">
+            <button type="submit" class="btn-primary">保存する</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. リンクリストモーダル -->
+  <div class="modal-wrapper" id="modal-linkList">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-linkList-title">リンクの追加・編集</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-linkList" class="form-grid cols-2">
+          <input type="hidden" id="linkList-id">
+          <div class="form-group span-2">
+            <label class="form-label" for="linkList-title">リンクタイトル <span class="req-tag">必須</span></label>
+            <input type="text" id="linkList-title" class="form-input" required placeholder="例: ファンレター宛先はこちら">
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label" for="linkList-link">遷移先URL <span class="req-tag">必須</span></label>
+            <input type="url" id="linkList-link" class="form-input" required placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="linkList-buttonImage">ボタン画像URL / パス (任意)</label>
+            <input type="text" id="linkList-buttonImage" class="form-input" placeholder="sample_button1.png">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="linkList-priority">表示優先度</label>
+            <input type="number" id="linkList-priority" class="form-input" min="1" value="1">
+          </div>
+          <div class="form-submit-row span-2">
+            <button type="submit" class="btn-primary">保存する</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- トースト通知コンテナ -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- JavaScript -->
+  <script src="js/admin.js"></script>
+</body>
+</html>
+

@@ -867,6 +867,20 @@ async function initApp() {
     apiInput.value = API_CONFIG.getBaseUrl();
   }
 
+  // 1. 管理画面で保存されたローカルデータ（lp_managed_data）があれば最優先で適用
+  const localManagedData = localStorage.getItem('lp_managed_data');
+  if (localManagedData) {
+    try {
+      const parsedData = JSON.parse(localManagedData);
+      console.log('[LP App] Loaded custom managed data from LocalStorage:', parsedData);
+      applyAllData(parsedData);
+      return;
+    } catch (e) {
+      console.warn('[LP App] LocalStorage parse error, falling back to API:', e);
+    }
+  }
+
+  // 2. LocalStorageにない場合は Workers API から取得
   try {
     const d1Data = await fetchD1DatabaseData();
     console.log('[D1 Data Received Successfully]:', d1Data);
@@ -880,8 +894,9 @@ async function initApp() {
 
   } catch (err) {
     console.warn('[D1 API Warning]:', err);
-    // エラー時はフォールバックデータで表示
-    applyAllData(FALLBACK_SCHEMA_DATA);
+    if (typeof FALLBACK_SCHEMA_DATA !== 'undefined') {
+      applyAllData(FALLBACK_SCHEMA_DATA);
+    }
     showApiWarning(err.message);
   }
 }
