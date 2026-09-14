@@ -180,76 +180,6 @@ class SectionManager {
 
     SectionManager.saveConfig(config);
   }
-
-  static moveSection(sectionId, direction) {
-    const config = SectionManager.getConfig();
-    const index = config.order.indexOf(sectionId);
-    if (index === -1) return;
-
-    const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= config.order.length) return;
-
-    const temp = config.order[index];
-    config.order[index] = config.order[targetIndex];
-    config.order[targetIndex] = temp;
-
-    SectionManager.applyConfig(config);
-    SectionManager.renderAdminPanel();
-  }
-
-  static setVisibility(sectionId, isVisible) {
-    const config = SectionManager.getConfig();
-    if (!config.visibility) config.visibility = {};
-    config.visibility[sectionId] = isVisible;
-
-    SectionManager.applyConfig(config);
-    SectionManager.renderAdminPanel();
-  }
-
-  static renderAdminPanel() {
-    const listEl = document.getElementById('admin-section-list');
-    if (!listEl) return;
-
-    const config = SectionManager.getConfig();
-    listEl.innerHTML = '';
-
-    config.order.forEach((sectionId, idx) => {
-      const isVisible = config.visibility ? config.visibility[sectionId] !== false : true;
-      const label = SectionManager.SECTION_LABELS[sectionId] || sectionId;
-
-      const item = document.createElement('div');
-      item.className = 'admin-section-item';
-      item.innerHTML = `
-        <label class="admin-item-label">
-          <input type="checkbox" ${isVisible ? 'checked' : ''} data-toggle-id="${sectionId}">
-          <span>${label}</span>
-        </label>
-        <div class="admin-item-controls">
-          <button class="btn-move btn-move-up" title="上へ移動" data-move-up="${sectionId}" ${idx === 0 ? 'disabled' : ''}>▲</button>
-          <button class="btn-move btn-move-down" title="下へ移動" data-move-down="${sectionId}" ${idx === config.order.length - 1 ? 'disabled' : ''}>▼</button>
-        </div>
-      `;
-      listEl.appendChild(item);
-    });
-
-    listEl.querySelectorAll('input[type="checkbox"]').forEach(chk => {
-      chk.addEventListener('change', (e) => {
-        SectionManager.setVisibility(e.target.dataset.toggleId, e.target.checked);
-      });
-    });
-
-    listEl.querySelectorAll('.btn-move-up').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        SectionManager.moveSection(e.currentTarget.dataset.moveUp, -1);
-      });
-    });
-
-    listEl.querySelectorAll('.btn-move-down').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        SectionManager.moveSection(e.currentTarget.dataset.moveDown, 1);
-      });
-    });
-  }
 }
 
 window.SectionManager = SectionManager;
@@ -860,12 +790,6 @@ function escapeHtml(str) {
 async function initApp() {
   const currentConfig = SectionManager.getConfig();
   SectionManager.applyConfig(currentConfig);
-  SectionManager.renderAdminPanel();
-
-  const apiInput = document.getElementById('api-url-input');
-  if (apiInput) {
-    apiInput.value = API_CONFIG.getBaseUrl();
-  }
 
   // 1. 管理画面で保存されたローカルデータ（lp_managed_data）があれば最優先で適用
   const localManagedData = localStorage.getItem('lp_managed_data');
@@ -894,8 +818,6 @@ async function initApp() {
 
   } catch (err) {
     console.warn('[D1 API Warning]:', err);
-    // エラー時はフォールバックデータで表示
-    applyAllData(FALLBACK_SCHEMA_DATA);
     if (typeof FALLBACK_SCHEMA_DATA !== 'undefined') {
       applyAllData(FALLBACK_SCHEMA_DATA);
     }
@@ -933,40 +855,6 @@ function showApiWarning(errorMsg) {
 
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
-
-  const dockToggle = document.getElementById('admin-dock-toggle');
-  const adminPanel = document.getElementById('admin-panel');
-  const adminClose = document.getElementById('admin-panel-close');
-  const btnReset = document.getElementById('btn-admin-reset');
-  const btnSaveApi = document.getElementById('btn-save-api');
-  const apiInput = document.getElementById('api-url-input');
-
-  if (dockToggle && adminPanel) {
-    dockToggle.addEventListener('click', () => {
-      adminPanel.classList.toggle('is-open');
-    });
-  }
-
-  if (adminClose && adminPanel) {
-    adminClose.addEventListener('click', () => {
-      adminPanel.classList.remove('is-open');
-    });
-  }
-
-  if (btnReset) {
-    btnReset.addEventListener('click', () => {
-      if (confirm('セクションの並び順と表示状態を初期状態に戻しますか？')) {
-        SectionManager.resetConfig();
-      }
-    });
-  }
-
-  if (btnSaveApi && apiInput) {
-    btnSaveApi.addEventListener('click', () => {
-      API_CONFIG.setBaseUrl(apiInput.value);
-      initApp();
-    });
-  }
 
   // モーダルイベント
   document.getElementById('image-modal-close')?.addEventListener('click', closeImageModal);
