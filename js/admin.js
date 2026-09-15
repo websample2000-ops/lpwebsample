@@ -105,6 +105,7 @@ async function loadAppData() {
       const data = await res.json();
       console.log('[Admin] Loaded data from Workers API:', data);
       appData = data;
+      if (!appData.gallery && data.galley) appData.gallery = data.galley;
       localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(appData));
     } else {
       console.warn('[Admin] API response not ok, using defaults');
@@ -128,6 +129,7 @@ async function reloadFromApi() {
     if (res.ok) {
       const data = await res.json();
       appData = data;
+      if (!appData.gallery && data.galley) appData.gallery = data.galley;
       localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(appData));
       initAllViews();
       showToast('APIからデータを再取得しました', 'success');

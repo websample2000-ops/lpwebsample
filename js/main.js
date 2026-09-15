@@ -194,7 +194,7 @@ function applyAllData(data) {
   renderProfileAndVisual(data.profile, data.visual);
   renderNotices(data.notice);
   renderSchedules(data.scheduleTag, data.schedule);
-  renderGalleries(data.galley);
+  renderGalleries(data.gallery || data.galley);
   renderMovies(data.movieLabel, data.movie);
   renderShops(data.shopTag, data.shop);
   renderLinks(data.linkList);
