@@ -321,11 +321,12 @@ function renderVisualTable() {
   list.sort((a, b) => (Number(a.priority) || 0) - (Number(b.priority) || 0));
 
   list.forEach((item, index) => {
+    const thumdBg = item.thumdBackground ? resolvePath(item.thumdBackground, 'thumdBackground') : 'assets/visual/thumd/background/default_thumdBackground.png';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>#${item.id}</td>
       <td>
-        <img src="${escapeHtml(resolvePath(item.thumdUrl || item.visualUrl, 'thumd'))}" class="table-thumb" alt="">
+        <img src="${escapeHtml(resolvePath(item.thumdUrl || item.visualUrl, 'thumd'))}" class="table-thumb" style="background-image:url('${escapeHtml(thumdBg)}');background-size:cover;background-position:center;" alt="">
       </td>
       <td><strong>${escapeHtml(item.costumeName || '衣装名未設定')}</strong></td>
       <td>${escapeHtml(item.illustrator || item.characterDesign || '-')}</td>
@@ -1083,7 +1084,7 @@ function renderLinkListTable() {
     tr.innerHTML = `
       <td>#${item.id}</td>
       <td><strong>${escapeHtml(item.title || '')}</strong></td>
-      <td>${item.buttonImage ? `<img src="${escapeHtml(resolvePath(item.buttonImage, 'link'))}" class="table-thumb" alt="">` : '-'}</td>
+      <td><img src="${escapeHtml(resolvePath(item.buttonImage || 'defaultbutton.png', 'link'))}" class="table-thumb" alt="" style="width:72px; height:auto; border-radius:6px;"></td>
       <td><a href="${escapeHtml(item.link)}" target="_blank" style="color:var(--accent-cyan); text-decoration:underline;">${escapeHtml(item.link)} ↗</a></td>
       <td>${Number(item.priority) || 1}</td>
       <td>
@@ -1348,15 +1349,23 @@ function escapeHtml(str) {
 
 function resolvePath(filename, type) {
   if (!filename) return '';
+  if (filename.startsWith('asset/')) {
+    filename = 'assets/' + filename.slice(6);
+  }
   if (filename.startsWith('http://') || filename.startsWith('https://') || filename.startsWith('/') || filename.startsWith('data:')) {
     return filename;
   }
   if (filename.startsWith('assets/')) {
     return filename;
   }
+  if (!filename.includes('.') && !filename.startsWith('data:')) {
+    filename += '.png';
+  }
   switch (type) {
     case 'visual': return `assets/visual/visual/${filename}`;
     case 'thumd': return `assets/visual/thumd/${filename}`;
+    case 'thumdBackground': return `assets/visual/thumd/background/${filename}`;
+    case 'visualBackground': return `assets/visual/background/${filename}`;
     case 'gallery': return `assets/gallery/${filename}`;
     case 'shop': return `assets/shop/${filename}`;
     case 'link': return `assets/link/${filename}`;

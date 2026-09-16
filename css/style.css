@@ -60,6 +60,21 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ページ全体の固定背景画像レイヤー (マスクなし・鮮明表示) */
+.page-bg-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background-image: url('../assets/visual/background/default_visualBackground.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -215,20 +230,12 @@ ul, ol {
   display: flex;
   align-items: center;
   overflow: hidden;
-  background: radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 50%),
-              var(--bg-main);
+  background: transparent;
 }
 
-/* 背景エフェクト */
+/* 背景エフェクト (背景画像を鮮明に見せるため非表示) */
 .hero-bg-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
+  display: none !important;
 }
 
 .glow-orb {
@@ -269,76 +276,83 @@ ul, ol {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 460px 1fr;
-  gap: 48px;
-  align-items: start;
+  grid-template-columns: 1fr 480px;
+  gap: 40px;
+  align-items: stretch;
 }
 
 /* --- 立ち絵・ビジュアルエリア --- */
 .hero-visual-col {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  height: 100%;
+  min-height: 0;
 }
 
 .visual-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 0;
 }
 
 .visual-card {
   position: relative;
   width: 100%;
-  height: 580px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(124,58,237,0.12) 100%),
-              rgba(18, 25, 44, 0.6);
-  border: 1px solid var(--border-highlight);
-  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6), var(--shadow-glow);
+  height: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  backdrop-filter: blur(12px);
+  background: none;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  overflow: visible;
+  padding: 0;
+  min-height: 0;
 }
 
 .visual-img {
-  width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  max-height: 100%;
+  width: auto;
+  max-width: none;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 25px rgba(124, 58, 237, 0.25));
   transition: transform 0.5s ease, opacity 0.3s ease;
 }
 
 .visual-badge {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  padding: 6px 14px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  border-radius: var(--radius-full);
-  background: rgba(10, 14, 26, 0.75);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  letter-spacing: 0.03em;
+  display: none !important;
 }
 
 /* 衣装セレクター */
 .costume-selector {
-  background: var(--bg-card);
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 20;
+  pointer-events: auto;
+  background: rgba(10, 14, 26, 0.88);
   border: 1px solid var(--border-glass);
-  border-radius: var(--radius-md);
-  padding: 14px 18px;
-  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  padding: 12px 18px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.55), 0 0 20px rgba(0, 0, 0, 0.3);
+  max-width: 100%;
 }
 
 .costume-selector-label {
   font-family: var(--font-family-en);
-  font-size: 0.75rem;
-  letter-spacing: 0.15em;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
   color: var(--accent-cyan);
   font-weight: 700;
   margin-bottom: 10px;
@@ -353,41 +367,65 @@ ul, ol {
 
 .costume-thumb-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 6px;
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.03);
+  justify-content: center;
+  padding: 0;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.06);
   border: 2px solid transparent;
   transition: all var(--transition-fast);
-  width: 100px;
+  width: 82px;
+  height: 82px;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
 }
 
-.costume-thumb-btn img {
+.costume-thumb-wrapper {
+  position: relative;
   width: 100%;
-  height: 70px;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+  display: block;
+}
+
+.costume-thumb-bg,
+.costume-thumb-img,
+.costume-thumb-wrapper img,
+.costume-thumb-btn img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: inherit;
+  display: block;
+}
+
+.costume-thumb-bg {
+  z-index: 1;
+}
+
+.costume-thumb-img {
+  z-index: 2;
 }
 
 .costume-thumb-btn span {
-  font-size: 0.75rem;
-  color: var(--text-sub);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 90px;
+  display: none !important;
 }
 
 .costume-thumb-btn:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .costume-thumb-btn.active {
   border-color: var(--accent-gold);
-  background: rgba(251, 191, 36, 0.1);
+  background: rgba(251, 191, 36, 0.15);
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.4);
 }
 
 .costume-thumb-btn.active span {
@@ -445,9 +483,16 @@ ul, ol {
 
 /* --- プロフィール詳細・スペックエリア --- */
 .hero-info-col {
+  position: relative;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.profile-header {
+  position: relative;
+  z-index: 15;
 }
 
 .profile-rubies {
@@ -474,6 +519,8 @@ ul, ol {
 }
 
 .profile-name {
+  position: relative;
+  z-index: 15;
   font-size: 3.2rem;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -482,6 +529,7 @@ ul, ol {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 12px;
+  filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.85));
 }
 
 .profile-nickname-badge {
@@ -510,77 +558,111 @@ ul, ol {
 }
 
 .profile-tagline {
+  position: relative;
+  z-index: 14;
   font-size: 1.25rem;
   font-weight: 700;
   color: #fff;
   line-height: 1.5;
   padding-left: 16px;
   border-left: 4px solid var(--accent-gold);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
 }
 
 .profile-message-box {
-  background: var(--bg-card);
+  position: relative;
+  z-index: 13;
+  background: rgba(15, 23, 42, 0.82);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
   padding: 20px 24px;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
   color: var(--text-sub);
   font-size: 0.98rem;
   box-shadow: var(--shadow-card);
 }
 
-/* プロフィールスペック グリッド */
-.profile-specs-grid {
+/* プロフィールスペック＆クレジット 横並びコンテナ */
+.profile-cards-row {
+  position: relative;
+  z-index: 12;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+  gap: 16px;
+  align-items: stretch;
 }
 
-.spec-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 18px;
-  border-radius: var(--radius-md);
+@media (max-width: 680px) {
+  .profile-cards-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* プロフィールスペック カード（クリエイタークレジット風に集約） */
+.profile-specs-box,
+.profile-cards-row .visual-credits-box {
   background: var(--bg-card);
   border: 1px solid var(--border-glass);
-  transition: transform var(--transition-fast), border-color var(--transition-fast);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-card);
+  height: 100%;
 }
 
-.spec-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--border-highlight);
+.specs-title {
+  font-family: var(--font-family-en);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: var(--accent-gold);
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-align: center;
 }
 
-.spec-card.spec-full {
-  grid-column: span 2;
-}
-
-.spec-icon {
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.spec-meta {
+.specs-list {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
-.spec-label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.spec-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.spec-row dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-sub);
   font-weight: 500;
 }
 
-.spec-value {
-  font-size: 1.05rem;
-  color: #fff;
+.spec-row dt .spec-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.spec-row dd {
   font-weight: 700;
+  color: var(--text-main);
+  font-size: 0.95rem;
 }
 
 /* チャンネル・プラットフォームボタン */
 .profile-channels {
+  position: relative;
+  z-index: 11;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -648,11 +730,13 @@ ul, ol {
   box-shadow: var(--shadow-glow);
 }
 
-/* 自己紹介動画ボタン */
+/* 自己紹介動画サムネイル表示 (動画リスト・ギャラリー同等サイズ) */
 .profile-intro-moves {
+  position: relative;
+  z-index: 11;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 .moves-label {
@@ -666,28 +750,93 @@ ul, ol {
 .moves-btn-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 20px;
 }
 
-.btn-movie-play {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  border-radius: var(--radius-full);
-  background: rgba(124, 58, 237, 0.15);
-  border: 1px solid rgba(124, 58, 237, 0.4);
-  color: #fff;
-  font-size: 0.88rem;
-  font-weight: 600;
+.intro-movie-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
   transition: all var(--transition-fast);
+  padding: 0;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-movie-play:hover {
-  background: var(--primary-gradient);
-  border-color: transparent;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-glow);
+.intro-movie-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--border-highlight);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(124, 58, 237, 0.35);
+}
+
+.intro-movie-thumb-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intro-movie-thumb-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+  transition: transform 0.4s ease;
+}
+
+.intro-movie-card:hover .intro-movie-thumb-wrapper img {
+  transform: scale(1.05);
+}
+
+.intro-movie-play-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(124, 58, 237, 0.9);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  transition: transform var(--transition-fast), background var(--transition-fast);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.intro-movie-play-badge svg {
+  margin-left: 2px;
+}
+
+.intro-movie-card:hover .intro-movie-play-badge {
+  transform: translate(-50%, -50%) scale(1.15);
+  background: var(--accent-pink);
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.7);
+}
+
+.intro-movie-placeholder {
+  color: rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #0f172a;
 }
 
 /* ============================================================
@@ -787,7 +936,7 @@ ul, ol {
    1. お知らせセクション (Notice)
    ============================================================ */
 .notice-section {
-  background: radial-gradient(circle at 50% 100%, rgba(124, 58, 237, 0.08) 0%, transparent 60%);
+  background: transparent;
 }
 
 .notice-list {
@@ -882,7 +1031,7 @@ ul, ol {
    2. スケジュールセクション (Schedule)
    ============================================================ */
 .schedule-section {
-  background: radial-gradient(circle at 10% 50%, rgba(56, 189, 248, 0.07) 0%, transparent 60%);
+  background: transparent;
 }
 
 .schedule-grid {
@@ -989,30 +1138,36 @@ ul, ol {
    3. ギャラリーセクション (Gallery)
    ============================================================ */
 .gallery-section {
-  background: radial-gradient(circle at 90% 50%, rgba(236, 72, 153, 0.07) 0%, transparent 60%);
+  background: transparent;
 }
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
 }
 
 .gallery-card {
   position: relative;
-  height: 280px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
   border-radius: var(--radius-md);
   overflow: hidden;
   cursor: pointer;
-  background: #131b2e;
+  background: #0a0e1a;
   border: 1px solid var(--border-glass);
   box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .gallery-card img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: #0a0e1a;
   transition: transform 0.5s ease;
 }
 
@@ -1058,7 +1213,7 @@ ul, ol {
    4. 動画リストセクション (Movie)
    ============================================================ */
 .movie-section {
-  background: radial-gradient(circle at 30% 80%, rgba(255, 0, 0, 0.05) 0%, transparent 60%);
+  background: transparent;
 }
 
 .movie-grid {
@@ -1087,20 +1242,25 @@ ul, ol {
 .movie-thumb-wrapper {
   position: relative;
   width: 100%;
-  height: 170px;
+  aspect-ratio: 16 / 9;
+  height: auto;
   overflow: hidden;
-  background: #1e293b;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .movie-thumb-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  background: #000;
   transition: transform 0.4s ease;
 }
 
 .movie-card:hover .movie-thumb-wrapper img {
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
 .movie-play-badge {
@@ -1154,7 +1314,7 @@ ul, ol {
    5. ショップリストセクション (Shop)
    ============================================================ */
 .shop-section {
-  background: radial-gradient(circle at 70% 30%, rgba(251, 191, 36, 0.05) 0%, transparent 60%);
+  background: transparent;
 }
 
 .shop-grid {
@@ -1166,17 +1326,17 @@ ul, ol {
 .shop-card {
   display: flex;
   flex-direction: column;
-  background: var(--bg-card);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-md);
+  background: #ffffff;
+  border-radius: 18px;
   overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   transition: all var(--transition-fast);
 }
 
 .shop-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--border-highlight);
-  box-shadow: var(--shadow-card);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
 .shop-image-wrapper {
@@ -1184,126 +1344,116 @@ ul, ol {
   width: 100%;
   height: 220px;
   overflow: hidden;
-  background: #182238;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .shop-image-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 12px;
   transition: transform 0.4s ease;
 }
 
 .shop-card:hover .shop-image-wrapper img {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .shop-tag-badge {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  padding: 4px 10px;
+  top: 10px;
+  left: 10px;
+  padding: 3px 10px;
   font-size: 0.72rem;
   font-weight: 700;
   border-radius: var(--radius-full);
-  background: rgba(10, 14, 26, 0.85);
+  background: rgba(10, 14, 26, 0.8);
   backdrop-filter: blur(6px);
-  color: var(--accent-gold);
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .shop-card-body {
-  padding: 20px;
+  padding: 16px 18px 18px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  gap: 12px;
+  gap: 8px;
 }
 
 .shop-card-title {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  color: #fff;
+  color: #1e293b;
   line-height: 1.4;
   flex-grow: 1;
+  margin: 0;
 }
 
 .shop-price-row {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 2px;
+  color: #ff4b72;
 }
 
 .shop-currency {
-  font-size: 0.9rem;
-  color: var(--accent-gold);
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ff4b72;
 }
 
 .shop-price-val {
   font-family: var(--font-family-en);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 800;
-  color: #fff;
+  color: #ff4b72;
 }
 
-.shop-links-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.shop-btn {
-  flex: 1;
-  min-width: 70px;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 0.78rem;
+.btn-shop-buy {
+  width: 100%;
+  padding: 10px 16px;
+  background: #ff5f85;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
   font-weight: 700;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-top: 4px;
   transition: all var(--transition-fast);
+  box-shadow: 0 3px 10px rgba(255, 95, 133, 0.28);
 }
 
-.shop-btn.btn-booth {
-  background: #fc4d50;
-  color: #fff;
-}
-.shop-btn.btn-booth:hover {
-  background: #e03b3e;
+.btn-shop-buy:hover {
+  background: #ff4773;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgba(255, 95, 133, 0.38);
 }
 
-.shop-btn.btn-suzuri {
-  background: #0088cc;
-  color: #fff;
-}
-.shop-btn.btn-suzuri:hover {
-  background: #0077b3;
+.btn-shop-buy:active {
+  transform: translateY(0);
 }
 
-.shop-btn.btn-base {
-  background: #111827;
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-.shop-btn.btn-base:hover {
-  background: #000;
-  border-color: #fff;
-}
-
-.shop-btn.btn-fanbox {
-  background: #fa9b00;
-  color: #fff;
-}
-.shop-btn.btn-fanbox:hover {
-  background: #e08b00;
+.btn-shop-buy .cart-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /* ============================================================
    6. リンクリストセクション (LinkList)
    ============================================================ */
 .link-section {
-  background: radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.05) 0%, transparent 70%);
+  background: transparent;
 }
 
 .link-grid {
@@ -1315,56 +1465,89 @@ ul, ol {
 }
 
 .link-card {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 24px;
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  border: 1px solid var(--border-glass);
+  padding: 18px 28px;
+  min-height: 72px;
+  border-radius: 18px;
+  background: transparent;
+  border: none;
+  overflow: hidden;
   transition: all var(--transition-fast);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  text-decoration: none;
+}
+
+.link-card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  z-index: 1;
+  pointer-events: none;
+  transition: transform 0.35s ease, filter 0.35s ease;
 }
 
 .link-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--border-highlight);
-  background: var(--bg-card-hover);
-  box-shadow: var(--shadow-glow);
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 0 24px rgba(124, 58, 237, 0.45);
+}
+
+.link-card:hover .link-card-bg {
+  transform: scale(1.03);
+  filter: brightness(1.12);
 }
 
 .link-card-left {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
 .link-card-icon {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-glass);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent-cyan);
-  font-size: 1.1rem;
+  color: #fff;
+  font-size: 1.15rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
 .link-card-title {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.75);
+  letter-spacing: 0.03em;
 }
 
 .link-card-arrow {
-  color: var(--text-muted);
-  transition: transform var(--transition-fast);
+  position: relative;
+  z-index: 2;
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
 }
 
 .link-card:hover .link-card-arrow {
   transform: translateX(4px);
-  color: var(--accent-gold);
+  color: #fff;
 }
 
 /* ============================================================
@@ -1526,6 +1709,165 @@ ul, ol {
   border: none;
 }
 
+/* ============================================================
+   ショップ詳細モーダル (購入先選択モーダル)
+   ============================================================ */
+.modal-content.shop-modal-content {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 380px;
+  width: 90%;
+  padding: 24px 20px 22px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+  border: none;
+  position: relative;
+}
+
+.shop-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  z-index: 10;
+}
+
+.shop-modal-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.shop-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 28px;
+}
+
+.shop-modal-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.shop-modal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.shop-modal-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.35;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shop-modal-price {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ff4b72;
+  font-family: var(--font-family-en);
+}
+
+.shop-modal-subtitle {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin: 20px 0 14px;
+  letter-spacing: 0.02em;
+}
+
+.shop-modal-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shop-mall-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-radius: 12px;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.shop-mall-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2);
+}
+
+.shop-mall-btn:active {
+  transform: translateY(0);
+}
+
+.mall-btn-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mall-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.mall-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+}
+
+/* プラットフォーム別背景色 */
+.btn-mall-booth {
+  background: #dc2626;
+}
+
+.btn-mall-suzuri {
+  background: #0076f7;
+}
+
+.btn-mall-base {
+  background: #2b2d30;
+}
+
+.btn-mall-fanbox {
+  background: #f59e0b;
+}
+
 
 
 /* ============================================================
@@ -1551,11 +1893,8 @@ ul, ol {
    ============================================================ */
 @media (max-width: 1024px) {
   .hero-container {
-    grid-template-columns: 380px 1fr;
+    grid-template-columns: 1fr 380px;
     gap: 32px;
-  }
-  .visual-card {
-    height: 480px;
   }
   .profile-name {
     font-size: 2.6rem;
@@ -1564,16 +1903,109 @@ ul, ol {
 
 @media (max-width: 860px) {
   .hero-container {
-    grid-template-columns: 1fr;
-    gap: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: stretch;
+  }
+  .hero-info-col {
+    display: contents;
+  }
+  .profile-header {
+    order: 1;
+  }
+  .profile-tagline {
+    order: 2;
+    margin-top: -6px;
   }
   .hero-visual-col {
-    max-width: 480px;
-    margin: 0 auto;
+    order: 3;
     width: 100%;
+    max-width: 520px;
+    margin: 8px auto 0;
+    height: auto;
+    min-height: auto;
+  }
+  .profile-message-box {
+    order: 4;
+  }
+  .profile-cards-row {
+    order: 5;
+  }
+  .profile-channels {
+    order: 6;
+  }
+  .profile-intro-moves {
+    order: 7;
+  }
+  .visual-stage {
+    position: relative;
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .visual-card {
-    height: 520px;
+    position: relative;
+    width: 100%;
+    height: 66vh;
+    min-height: 440px;
+    max-height: 650px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  .visual-img {
+    height: 100%;
+    width: auto;
+    max-width: none;
+    max-height: none;
+    object-fit: contain;
+    pointer-events: auto;
+  }
+  .costume-selector {
+    position: absolute;
+    left: 16px;
+    top: 12px;
+    bottom: auto;
+    right: auto;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    z-index: 20;
+  }
+  .costume-selector-label {
+    display: none;
+  }
+  .costume-thumbs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .costume-thumb-btn {
+    width: 66px;
+    height: 66px;
+    padding: 0;
+    border-radius: var(--radius-md);
+    background: rgba(10, 14, 26, 0.75);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+  }
+  .costume-thumb-btn.active {
+    border-color: var(--accent-gold);
+    background: rgba(251, 191, 36, 0.2);
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.5);
   }
   .nav-links, .nav-sns {
     display: none;
@@ -1621,12 +2053,42 @@ ul, ol {
   .spec-card.spec-full {
     grid-column: span 1;
   }
+  .hero-visual-col {
+    margin: 4px -24px 0;
+    width: calc(100% + 48px);
+    max-width: calc(100% + 48px);
+  }
   .visual-card {
-    height: 420px;
+    height: 62vh;
+    min-height: 400px;
+    max-height: 580px;
+  }
+  .costume-selector {
+    left: 16px;
+    top: 8px;
+    bottom: auto;
+  }
+  .costume-thumb-btn {
+    width: 60px;
+    height: 60px;
+    padding: 0;
+  }
+  .moves-btn-group {
+    width: 100%;
+  }
+  .intro-movie-card {
+    max-width: 100%;
   }
   .admin-panel {
     width: calc(100vw - 48px);
     right: -12px;
+  }
+  .link-card {
+    padding: 14px 20px;
+    min-height: 62px;
+  }
+  .link-card-title {
+    font-size: 0.98rem;
   }
 }
 

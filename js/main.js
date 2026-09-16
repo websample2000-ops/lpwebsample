@@ -40,8 +40,15 @@ function getYouTubeId(url) {
  * 画像アセットのローカルパス解決
  * (D1データベース内のファイル名を assets/ 以下のパスに補完)
  */
+const DEFAULT_VISUAL_BACKGROUND = 'assets/visual/background/default_visualBackground.png';
+const DEFAULT_THUMD_BACKGROUND = 'assets/visual/thumd/background/default_thumdBackground.png';
+const DEFAULT_LINK_BUTTON_IMAGE = 'assets/link/defaultbutton.png';
+
 function resolveAssetUrl(filename, type) {
   if (!filename) return '';
+  if (filename.startsWith('asset/')) {
+    filename = 'assets/' + filename.slice(6);
+  }
   if (filename.startsWith('http://') || filename.startsWith('https://') || filename.startsWith('/') || filename.startsWith('data:')) {
     return filename;
   }
@@ -53,6 +60,10 @@ function resolveAssetUrl(filename, type) {
       return `assets/visual/visual/${filename}`;
     case 'thumd':
       return `assets/visual/thumd/${filename}`;
+    case 'thumdBackground':
+      return `assets/visual/thumd/background/${filename}`;
+    case 'visualBackground':
+      return `assets/visual/background/${filename}`;
     case 'gallery':
       return `assets/gallery/${filename}`;
     case 'shop':
@@ -64,6 +75,62 @@ function resolveAssetUrl(filename, type) {
     default:
       return `assets/${filename}`;
   }
+}
+
+/**
+ * サムネイル背景画像URLの解決
+ * (未設定の場合は schema/visual.yaml の default_thumdBackground.png を参照)
+ */
+function getThumdBackgroundUrl(bgFilename) {
+  if (!bgFilename || typeof bgFilename !== 'string') {
+    return DEFAULT_THUMD_BACKGROUND;
+  }
+  const trimmed = bgFilename.trim();
+  if (trimmed === '' || trimmed === 'null' || trimmed === 'undefined' || trimmed === '-') {
+    return DEFAULT_THUMD_BACKGROUND;
+  }
+  return resolveAssetUrl(trimmed, 'thumdBackground');
+}
+
+/**
+ * リンクリストのボタン背景画像URLの解決
+ * (未設定の場合は schema/linkList.yaml の defaultbutton.png を参照)
+ */
+function getLinkButtonImageUrl(imgFilename) {
+  if (!imgFilename || typeof imgFilename !== 'string') {
+    return DEFAULT_LINK_BUTTON_IMAGE;
+  }
+  let trimmed = imgFilename.trim();
+  if (trimmed === '' || trimmed === 'null' || trimmed === 'undefined' || trimmed === '-') {
+    return DEFAULT_LINK_BUTTON_IMAGE;
+  }
+  // 拡張子が省略されている場合は .png を補完
+  if (!trimmed.includes('.') && !trimmed.startsWith('data:')) {
+    trimmed += '.png';
+  }
+  return resolveAssetUrl(trimmed, 'link');
+}
+
+/**
+ * ページ全体の背景画像を更新
+ * (未設定の場合は schema/visual.yaml の default 背景画像を参照)
+ */
+function applyVisualBackground(bgFilename) {
+  let bgPath = DEFAULT_VISUAL_BACKGROUND;
+  if (bgFilename && typeof bgFilename === 'string') {
+    const trimmed = bgFilename.trim();
+    if (trimmed !== '' && trimmed !== 'null' && trimmed !== 'undefined' && trimmed !== '-') {
+      bgPath = resolveAssetUrl(trimmed, 'visualBackground');
+    }
+  }
+
+  console.log('[Visual Background Applied]:', bgPath);
+
+  const bgEl = document.getElementById('page-bg-layer');
+  if (bgEl) {
+    bgEl.style.backgroundImage = `url('${bgPath}')`;
+  }
+  document.body.style.backgroundImage = `url('${bgPath}')`;
 }
 
 /**
@@ -287,9 +354,31 @@ function renderProfileAndVisual(profile, visuals) {
         const url = typeof move === 'string' ? move : (move.url || move.link);
         const title = (typeof move === 'object' && move.title) ? move.title : `自己紹介動画 #${i + 1}`;
         if (!url) return;
+
+        // サムネイル画像の取得（YouTube動画の場合は高画質maxresdefaultを優先し、非対応時はhqdefaultへフォールバック）
+        let thumbUrl = (typeof move === 'object' && move.thumbnail) ? move.thumbnail : '';
+        let fallbackThumbUrl = '';
+        if (!thumbUrl) {
+          const ytId = getYouTubeId(url);
+          if (ytId) {
+            thumbUrl = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+            fallbackThumbUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+          }
+        }
+
         const btn = document.createElement('button');
-        btn.className = 'btn-movie-play';
-        btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> <span>${escapeHtml(title)}</span>`;
+        btn.className = 'intro-movie-card';
+        btn.type = 'button';
+        btn.title = title;
+        btn.setAttribute('aria-label', `${title} を再生`);
+        btn.innerHTML = `
+          <div class="intro-movie-thumb-wrapper">
+            ${thumbUrl ? `<img src="${escapeHtml(thumbUrl)}" alt="${escapeHtml(title)}" loading="lazy"${fallbackThumbUrl ? ` onerror="this.onerror=null;this.src='${escapeHtml(fallbackThumbUrl)}';"` : ''}>` : `<div class="intro-movie-placeholder"><svg viewBox="0 0 24 24" width="36" height="36" fill="currentColor"><path d="M21.58 7.19c-.23-.86-.91-1.54-1.77-1.77C18.25 5 12 5 12 5s-6.25 0-7.81.42c-.86.23-1.54.91-1.77 1.77C2 8.75 2 12 2 12s0 3.25.42 4.81c.23.86.91 1.54 1.77 1.77C5.75 19 12 19 12 19s6.25 0 7.81-.42c.86-.23 1.54-.91 1.77-1.77C22 15.25 22 12 22 12s0-3.25-.42-4.81zM10 15V9l5.2 3-5.2 3z"/></svg></div>`}
+            <div class="intro-movie-play-badge">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </div>
+        `;
         btn.addEventListener('click', () => openVideoModal(url, title));
         movesBox.appendChild(btn);
       });
@@ -305,11 +394,16 @@ function renderProfileAndVisual(profile, visuals) {
 
     visuals.forEach((vis, index) => {
       const thumdPath = resolveAssetUrl(vis.thumdUrl || vis.visualUrl, 'thumd');
+      const thumdBgPath = getThumdBackgroundUrl(vis.thumdBackground || vis.thumd_background);
       const btn = document.createElement('button');
       btn.className = `costume-thumb-btn ${index === 0 ? 'active' : ''}`;
+      if (vis.costumeName) btn.title = vis.costumeName;
+      btn.setAttribute('aria-label', vis.costumeName || `衣装 #${vis.id}`);
       btn.innerHTML = `
-        <img src="${escapeHtml(thumdPath)}" alt="${escapeHtml(vis.costumeName || '衣装')}">
-        <span>${escapeHtml(vis.costumeName || `衣装 #${vis.id}`)}</span>
+        <div class="costume-thumb-wrapper">
+          <img class="costume-thumb-bg" src="${escapeHtml(thumdBgPath)}" alt="" loading="lazy">
+          <img class="costume-thumb-img" src="${escapeHtml(thumdPath)}" alt="${escapeHtml(vis.costumeName || '衣装')}" loading="lazy">
+        </div>
       `;
       btn.addEventListener('click', () => {
         document.querySelectorAll('.costume-thumb-btn').forEach(b => b.classList.remove('active'));
@@ -327,6 +421,10 @@ function switchVisual(visual) {
   if (!visual) return;
   const mainImg = document.getElementById('current-visual-img');
   const badge = document.getElementById('current-costume-badge');
+
+  // ページ全体の背景画像を visualBackground (未設定時は default 背景) に更新
+  const targetBg = visual.visualBackground || visual.visual_background;
+  applyVisualBackground(targetBg);
 
   const visualPath = resolveAssetUrl(visual.visualUrl, 'visual');
 
@@ -555,12 +653,14 @@ function renderMovies(labels, movies) {
     filtered.forEach(item => {
       const tagName = labelMap[item.tagLabel] || '動画';
       
-      // サムネイルURL判定（未入力の場合はYouTube動画IDからhqdefault.jpgを自動生成）
+      // サムネイルURL判定（未入力の場合はYouTube動画IDから高画質maxresdefaultを優先、非対応時はhqdefaultへフォールバック）
       let imgUrl = item.imageUrl ? resolveAssetUrl(item.imageUrl, 'movie') : '';
+      let fallbackImgUrl = '';
       if (!imgUrl && item.videoUrl) {
         const ytId = getYouTubeId(item.videoUrl);
         if (ytId) {
-          imgUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+          imgUrl = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+          fallbackImgUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
         }
       }
 
@@ -568,7 +668,7 @@ function renderMovies(labels, movies) {
       card.className = 'movie-card';
       card.innerHTML = `
         <div class="movie-thumb-wrapper">
-          <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.title)}">
+          <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.title)}" loading="lazy"${fallbackImgUrl ? ` onerror="this.onerror=null;this.src='${escapeHtml(fallbackImgUrl)}';"` : ''}>
           <div class="movie-play-badge">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           </div>
@@ -641,12 +741,6 @@ function renderShops(tags, shops) {
       const card = document.createElement('div');
       card.className = 'shop-card';
 
-      let linksHtml = '';
-      if (item.booth) linksHtml += `<a href="${escapeHtml(item.booth)}" target="_blank" rel="noopener noreferrer" class="shop-btn btn-booth">BOOTH</a>`;
-      if (item.suzuri) linksHtml += `<a href="${escapeHtml(item.suzuri)}" target="_blank" rel="noopener noreferrer" class="shop-btn btn-suzuri">SUZURI</a>`;
-      if (item.base) linksHtml += `<a href="${escapeHtml(item.base)}" target="_blank" rel="noopener noreferrer" class="shop-btn btn-base">BASE</a>`;
-      if (item.fanbox) linksHtml += `<a href="${escapeHtml(item.fanbox)}" target="_blank" rel="noopener noreferrer" class="shop-btn btn-fanbox">FANBOX</a>`;
-
       card.innerHTML = `
         <div class="shop-image-wrapper">
           <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.name)}">
@@ -658,11 +752,22 @@ function renderShops(tags, shops) {
             <span class="shop-currency">¥</span>
             <span class="shop-price-val">${Number(item.price || 0).toLocaleString()}</span>
           </div>
-          <div class="shop-links-group">
-            ${linksHtml}
-          </div>
+          <button type="button" class="btn-shop-buy">
+            <svg class="cart-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+            </svg>
+            <span>購入はこちら</span>
+          </button>
         </div>
       `;
+
+      const buyBtn = card.querySelector('.btn-shop-buy');
+      if (buyBtn) {
+        buyBtn.addEventListener('click', () => {
+          openShopModal(item, imgUrl);
+        });
+      }
+
       gridContainer.appendChild(card);
     });
   }
@@ -691,12 +796,14 @@ function renderLinks(linkLists) {
   linkLists.sort((a, b) => (a.priority || 0) - (b.priority || 0));
 
   linkLists.forEach(item => {
+    const buttonImgUrl = getLinkButtonImageUrl(item.buttonImage);
     const card = document.createElement('a');
     card.className = 'link-card';
     card.href = item.link;
     card.target = '_blank';
     card.rel = 'noopener noreferrer';
     card.innerHTML = `
+      <img class="link-card-bg" src="${escapeHtml(buttonImgUrl)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${escapeHtml(DEFAULT_LINK_BUTTON_IMAGE)}';">
       <div class="link-card-left">
         <div class="link-card-icon">✦</div>
         <span class="link-card-title">${escapeHtml(item.title)}</span>
@@ -763,6 +870,104 @@ function closeVideoModal() {
   document.body.style.overflow = '';
 }
 
+function openShopModal(item, imgUrl) {
+  const modal = document.getElementById('shop-modal');
+  if (!modal) return;
+
+  const thumbEl = document.getElementById('shop-modal-thumb');
+  const titleEl = document.getElementById('shop-modal-title');
+  const priceEl = document.getElementById('shop-modal-price');
+  const linksContainer = document.getElementById('shop-modal-links');
+
+  if (thumbEl) {
+    thumbEl.src = imgUrl || '';
+    thumbEl.alt = item.name || '';
+  }
+  if (titleEl) {
+    titleEl.textContent = item.name || '';
+  }
+  if (priceEl) {
+    priceEl.textContent = `¥${Number(item.price || 0).toLocaleString()}`;
+  }
+
+  if (linksContainer) {
+    linksContainer.innerHTML = '';
+
+    // プラットフォーム定義（画像2準拠のアイコン・テキスト・配色クラス）
+    const platforms = [
+      {
+        id: 'booth',
+        name: 'BOOTHで購入',
+        url: item.booth,
+        className: 'btn-mall-booth',
+        icon: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg>`
+      },
+      {
+        id: 'suzuri',
+        name: 'SUZURIで購入',
+        url: item.suzuri,
+        className: 'btn-mall-suzuri',
+        icon: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M16 2l-4 3-4-3-6 4 3 4 2-1v12h10V8l2 1 3-4-6-4z"/></svg>`
+      },
+      {
+        id: 'base',
+        name: 'BASEで購入',
+        url: item.base,
+        className: 'btn-mall-base',
+        icon: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z"/></svg>`
+      },
+      {
+        id: 'fanbox',
+        name: 'FANBOXで支援・購入',
+        url: item.fanbox,
+        className: 'btn-mall-fanbox',
+        icon: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`
+      }
+    ];
+
+    let hasAnyLink = false;
+    platforms.forEach(p => {
+      const url = p.url ? String(p.url).trim() : '';
+      if (url && url !== '-' && url !== 'null' && url !== 'undefined') {
+        hasAnyLink = true;
+        const btn = document.createElement('a');
+        btn.href = url;
+        btn.target = '_blank';
+        btn.rel = 'noopener noreferrer';
+        btn.className = `shop-mall-btn ${p.className}`;
+        btn.innerHTML = `
+          <span class="mall-btn-left">
+            <span class="mall-icon">${p.icon}</span>
+            <span class="mall-text">${escapeHtml(p.name)}</span>
+          </span>
+          <span class="mall-arrow">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </span>
+        `;
+        linksContainer.appendChild(btn);
+      }
+    });
+
+    if (!hasAnyLink) {
+      linksContainer.innerHTML = '<p class="text-muted" style="text-align:center;padding:16px 0;font-size:0.85rem;">現在設定されている購入先はありません。</p>';
+    }
+  }
+
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeShopModal() {
+  const modal = document.getElementById('shop-modal');
+  if (!modal) return;
+  modal.classList.remove('is-open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
 
 // ============================================================
 // 5. ユーティリティ
@@ -789,6 +994,9 @@ function escapeHtml(str) {
 // 6. アプリケーション初期化 (D1 API連携)
 // ============================================================
 async function initApp() {
+  // 初期背景画像（デフォルト背景）を設定
+  applyVisualBackground();
+
   const currentConfig = SectionManager.getConfig();
   SectionManager.applyConfig(currentConfig);
 
@@ -862,11 +1070,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('image-modal-backdrop')?.addEventListener('click', closeImageModal);
   document.getElementById('video-modal-close')?.addEventListener('click', closeVideoModal);
   document.getElementById('video-modal-backdrop')?.addEventListener('click', closeVideoModal);
+  document.getElementById('shop-modal-close')?.addEventListener('click', closeShopModal);
+  document.getElementById('shop-modal-backdrop')?.addEventListener('click', closeShopModal);
 
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeImageModal();
       closeVideoModal();
+      closeShopModal();
     }
   });
 

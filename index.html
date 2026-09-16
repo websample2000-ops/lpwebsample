@@ -15,6 +15,8 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- ページ全体の固定背景画像レイヤー (マスクなし) -->
+  <div class="page-bg-layer" id="page-bg-layer"></div>
 
   <!-- ============================================================
        グローバルナビゲーション
@@ -71,53 +73,7 @@
 
     <div class="container hero-container">
       
-      <!-- 立ち絵・ビジュアル表示エリア -->
-      <div class="hero-visual-col">
-        <!-- 立ち絵カードフレーム -->
-        <div class="visual-stage">
-          <div class="visual-card">
-            <!-- 立ち絵画像 (JSで動的切り替え可能) -->
-            <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&auto=format&fit=crop&q=80" 
-                 alt="立ち絵メインビジュアル" 
-                 id="current-visual-img" 
-                 class="visual-img">
-            <div class="visual-badge" id="current-costume-badge">通常衣装（星空のローブ）</div>
-          </div>
-
-          <!-- 衣装セレクター (複数立ち絵の切り替え) -->
-          <div class="costume-selector" id="costume-selector-wrapper">
-            <div class="costume-selector-label">✦ COSTUME SELECT ✦</div>
-            <div class="costume-thumbs" id="costume-thumbs">
-              <!-- JSでvisual.yamlデータから動的生成 -->
-            </div>
-          </div>
-
-          <!-- 制作クレジット情報 (visual.yaml の各項目) -->
-          <div class="visual-credits-box" id="visual-credits">
-            <div class="credits-title">✦ CREATIVE CREDITS ✦</div>
-            <dl class="credits-list" id="credits-list">
-              <div class="credit-row">
-                <dt>キャラクターデザイン</dt>
-                <dd id="credit-characterDesign">星空 イラスト</dd>
-              </div>
-              <div class="credit-row">
-                <dt>イラストレーター</dt>
-                <dd id="credit-illustrator">星空 イラスト</dd>
-              </div>
-              <div class="credit-row">
-                <dt>Live2Dモデラー</dt>
-                <dd id="credit-live2d">スタジオ・モデリング</dd>
-              </div>
-              <div class="credit-row" id="credit-row-3d">
-                <dt>3Dモデラー</dt>
-                <dd id="credit-3dModeling">3Dクラフト Lab</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-      </div>
-
-      <!-- プロフィールテキスト・基本情報エリア -->
+      <!-- プロフィールテキスト・基本情報エリア（左側） -->
       <div class="hero-info-col">
         <!-- ネームヘッダー -->
         <div class="profile-header">
@@ -146,42 +102,56 @@
           </p>
         </div>
 
-        <!-- プロフィールスペック（グリッドカード） -->
-        <div class="profile-specs-grid">
-          <div class="spec-card">
-            <span class="spec-icon">🎂</span>
-            <div class="spec-meta">
-              <span class="spec-label">誕生日</span>
-              <strong class="spec-value" id="prof-birthday">07月15日</strong>
-            </div>
+        <!-- プロフィールスペック ＆ 制作クレジットのカードコンテナ -->
+        <div class="profile-cards-row">
+          <!-- プロフィールスペック（クリエイタークレジット風カード） -->
+          <div class="profile-specs-box" id="profile-specs">
+            <div class="specs-title">✦ PROFILE SPECS ✦</div>
+            <dl class="specs-list" id="specs-list">
+              <div class="spec-row">
+                <dt><span class="spec-icon">🎂</span> 誕生日</dt>
+                <dd id="prof-birthday">07月15日</dd>
+              </div>
+              <div class="spec-row">
+                <dt><span class="spec-icon">🚀</span> 活動開始日</dt>
+                <dd id="prof-streaming">2023年10月01日</dd>
+              </div>
+              <div class="spec-row">
+                <dt><span class="spec-icon">✨</span> 年齢</dt>
+                <dd><span id="prof-age">18</span> 歳</dd>
+              </div>
+              <div class="spec-row">
+                <dt><span class="spec-icon">📏</span> 身長</dt>
+                <dd><span id="prof-height">152</span> cm</dd>
+              </div>
+              <div class="spec-row">
+                <dt><span class="spec-icon">💫</span> ファンネーム</dt>
+                <dd id="prof-fanName">ステラメイト</dd>
+              </div>
+            </dl>
           </div>
-          <div class="spec-card">
-            <span class="spec-icon">🚀</span>
-            <div class="spec-meta">
-              <span class="spec-label">活動開始日</span>
-              <strong class="spec-value" id="prof-streaming">2023年10月01日</strong>
-            </div>
-          </div>
-          <div class="spec-card">
-            <span class="spec-icon">✨</span>
-            <div class="spec-meta">
-              <span class="spec-label">年齢</span>
-              <strong class="spec-value"><span id="prof-age">18</span> 歳</strong>
-            </div>
-          </div>
-          <div class="spec-card">
-            <span class="spec-icon">📏</span>
-            <div class="spec-meta">
-              <span class="spec-label">身長</span>
-              <strong class="spec-value"><span id="prof-height">152</span> cm</strong>
-            </div>
-          </div>
-          <div class="spec-card spec-full">
-            <span class="spec-icon">💫</span>
-            <div class="spec-meta">
-              <span class="spec-label">ファンネーム</span>
-              <strong class="spec-value" id="prof-fanName">ステラメイト</strong>
-            </div>
+
+          <!-- 制作クレジット情報 (visual.yaml の各項目) -->
+          <div class="visual-credits-box" id="visual-credits">
+            <div class="credits-title">✦ CREATIVE CREDITS ✦</div>
+            <dl class="credits-list" id="credits-list">
+              <div class="credit-row">
+                <dt>キャラクターデザイン</dt>
+                <dd id="credit-characterDesign">星空 イラスト</dd>
+              </div>
+              <div class="credit-row">
+                <dt>イラストレーター</dt>
+                <dd id="credit-illustrator">星空 イラスト</dd>
+              </div>
+              <div class="credit-row">
+                <dt>Live2Dモデラー</dt>
+                <dd id="credit-live2d">スタジオ・モデリング</dd>
+              </div>
+              <div class="credit-row" id="credit-row-3d">
+                <dt>3Dモデラー</dt>
+                <dd id="credit-3dModeling">3Dクラフト Lab</dd>
+              </div>
+            </dl>
           </div>
         </div>
 
@@ -211,6 +181,28 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- 立ち絵・ビジュアル表示エリア（右側） -->
+      <div class="hero-visual-col">
+        <!-- 立ち絵カードフレーム -->
+        <div class="visual-stage">
+          <div class="visual-card">
+            <!-- 立ち絵画像 (JSで動的切り替え可能) -->
+            <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&auto=format&fit=crop&q=80" 
+                 alt="立ち絵メインビジュアル" 
+                 id="current-visual-img" 
+                 class="visual-img">
+          </div>
+
+          <!-- 衣装セレクター (複数立ち絵の切り替え) -->
+          <div class="costume-selector" id="costume-selector-wrapper">
+            <div class="costume-selector-label">✦ COSTUME SELECT ✦</div>
+            <div class="costume-thumbs" id="costume-thumbs">
+              <!-- JSでvisual.yamlデータから動的生成 -->
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -390,6 +382,25 @@
         <iframe src="" id="video-modal-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
       </div>
       <div class="modal-caption" id="video-modal-title"></div>
+    </div>
+  </div>
+
+  <!-- ショップ購入先選択モーダル -->
+  <div class="modal-overlay" id="shop-modal" aria-hidden="true">
+    <div class="modal-backdrop" id="shop-modal-backdrop"></div>
+    <div class="modal-content shop-modal-content">
+      <button class="shop-modal-close" id="shop-modal-close" aria-label="閉じる">&times;</button>
+      <div class="shop-modal-header">
+        <img src="" alt="" id="shop-modal-thumb" class="shop-modal-thumb">
+        <div class="shop-modal-info">
+          <h4 id="shop-modal-title" class="shop-modal-title">商品名</h4>
+          <div id="shop-modal-price" class="shop-modal-price">¥0</div>
+        </div>
+      </div>
+      <div class="shop-modal-subtitle">購入先プラットフォームを選択</div>
+      <div class="shop-modal-links" id="shop-modal-links">
+        <!-- JSで動的にボタン生成 -->
+      </div>
     </div>
   </div>
 
