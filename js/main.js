@@ -413,11 +413,13 @@ function renderProfileAndVisual(profile, visuals) {
       thumbsContainer.appendChild(btn);
     });
 
-    switchVisual(visuals[0]);
+    switchVisual(visuals[0], true);
   }
 }
 
-function switchVisual(visual) {
+let visualSwitchTimeout = null;
+
+function switchVisual(visual, isInitial = false) {
   if (!visual) return;
   const mainImg = document.getElementById('current-visual-img');
   const badge = document.getElementById('current-costume-badge');
@@ -427,15 +429,6 @@ function switchVisual(visual) {
   applyVisualBackground(targetBg);
 
   const visualPath = resolveAssetUrl(visual.visualUrl, 'visual');
-
-  if (mainImg) {
-    mainImg.style.opacity = '0';
-    setTimeout(() => {
-      mainImg.src = visualPath;
-      mainImg.alt = visual.costumeName || '立ち絵';
-      mainImg.style.opacity = '1';
-    }, 200);
-  }
 
   if (badge) {
     badge.textContent = visual.costumeName || '衣装';
@@ -454,6 +447,50 @@ function switchVisual(visual) {
     } else {
       row3d.style.display = 'none';
     }
+  }
+
+  if (mainImg) {
+    // 初回表示時はアニメーションなしで即時セット
+    if (isInitial) {
+      mainImg.src = visualPath;
+      mainImg.alt = visual.costumeName || '立ち絵';
+      mainImg.classList.remove('is-slide-out', 'is-slide-in-prep');
+      mainImg.dataset.currentSrc = visualPath;
+      return;
+    }
+
+    // すでに同じ画像が表示されている場合はスキップ
+    if (mainImg.dataset.currentSrc === visualPath) {
+      return;
+    }
+    mainImg.dataset.currentSrc = visualPath;
+
+    // 前のアニメーションタイマーがあればクリア
+    if (visualSwitchTimeout) {
+      clearTimeout(visualSwitchTimeout);
+      visualSwitchTimeout = null;
+    }
+
+    // 1. 右へスライドしながらフェードアウト
+    mainImg.classList.remove('is-slide-in-prep');
+    mainImg.classList.add('is-slide-out');
+
+    // フェードアウト所要時間（240ms）後に新しい画像を右側からスライドイン
+    visualSwitchTimeout = setTimeout(() => {
+      // 2. 画像差し替え & 右側初期位置へセット（トランジション無効化）
+      mainImg.src = visualPath;
+      mainImg.alt = visual.costumeName || '立ち絵';
+      mainImg.classList.remove('is-slide-out');
+      mainImg.classList.add('is-slide-in-prep');
+
+      // リフロー強制（ブラウザに初期位置を認識させる）
+      void mainImg.offsetWidth;
+
+      // 3. 次の描画フレームで初期位置から中央へスライドイン＆フェードイン
+      requestAnimationFrame(() => {
+        mainImg.classList.remove('is-slide-in-prep');
+      });
+    }, 240);
   }
 }
 
@@ -505,14 +542,15 @@ function renderNotices(notices) {
 
 function renderSchedules(tags, schedules) {
   const tabContainer = document.getElementById('schedule-filter-tabs');
-  const gridContainer = document.getElementById('schedule-container');
-  if (!tabContainer || !gridContainer) return;
+  const container = document.getElementById('schedule-container');
+  if (!tabContainer || !container) return;
 
   const tagMap = {};
   if (Array.isArray(tags)) {
     tags.forEach(t => { tagMap[t.id] = t.tagName; });
   }
 
+  // scheduleTag タブの生成
   tabContainer.innerHTML = '<button class="filter-tab active" data-tag-id="all">すべて</button>';
   if (Array.isArray(tags)) {
     tags.forEach(tag => {
@@ -524,58 +562,329 @@ function renderSchedules(tags, schedules) {
     });
   }
 
-  function displaySchedules(filterTagId = 'all') {
-    gridContainer.innerHTML = '';
-    const items = Array.isArray(schedules) ? schedules : [];
-    
-    const filtered = items.filter(s => {
-      const active = (s.is_active === 1 || s.is_active === true || s.is_active === "1");
-      if (!active) return false;
-      if (filterTagId === 'all') return true;
-      return String(s.scheduleTag) === String(filterTagId);
-    });
-
-    if (filtered.length === 0) {
-      gridContainer.innerHTML = '<p class="text-muted" style="text-align:center;grid-column:1/-1;padding:30px;">予定されているスケジュールはありません。</p>';
-      return;
-    }
-
-    filtered.forEach(item => {
-      const tagName = tagMap[item.scheduleTag] || 'イベント';
-      const picUrl = item.picture ? resolveAssetUrl(item.picture, 'schedule') : null;
-      const card = document.createElement('div');
-      card.className = 'schedule-card';
-      card.innerHTML = `
-        ${picUrl ? `
-          <div class="schedule-image-box">
-            <img src="${escapeHtml(picUrl)}" alt="${escapeHtml(item.title)}">
-          </div>
-        ` : ''}
-        <div class="schedule-card-body">
-          <div class="schedule-date-tag-row">
-            <div class="schedule-datetime">
-              <span class="schedule-date">${escapeHtml(item.schedule_at || '')}</span>
-              ${item.time ? `<span class="schedule-time">${escapeHtml(item.time)}〜</span>` : ''}
-            </div>
-            <span class="schedule-tag-badge">${escapeHtml(tagName)}</span>
-          </div>
-          <h3 class="schedule-card-title">${escapeHtml(item.title)}</h3>
-          ${item.detail ? `<p class="schedule-card-detail">${escapeHtml(item.detail)}</p>` : ''}
-        </div>
-      `;
-      gridContainer.appendChild(card);
-    });
+  // 日付操作ユーティリティ
+  function toYMD(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   }
 
+  function getMonday(d) {
+    const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const day = date.getDay(); // 0: 日, 1: 月, ..., 6: 土
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(date.setDate(diff));
+  }
+
+  function addDays(d, days) {
+    const result = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+  const WEEK_DAYS = [
+    { ja: '月', en: 'MON' },
+    { ja: '火', en: 'TUE' },
+    { ja: '水', en: 'WED' },
+    { ja: '木', en: 'THU' },
+    { ja: '金', en: 'FRI' },
+    { ja: '土', en: 'SAT', isSat: true },
+    { ja: '日', en: 'SUN', isSun: true }
+  ];
+
+  const today = new Date();
+  const todayYMD = toYMD(today);
+
+  // 状態管理
+  let currentWeekMonday = getMonday(today);
+  let selectedDateYMD = todayYMD;
+  let currentFilterTagId = 'all';
+  let isInitial = true;
+
+  const allItems = Array.isArray(schedules) ? schedules : [];
+
+  // カレンダーとぶら下がりタスクを再描画する関数
+  function updateView() {
+    container.innerHTML = '';
+
+    // 有効なスケジュールをフィルタリング（タグ絞り込み含む）
+    const activeItems = allItems.filter(s => {
+      const active = (s.is_active === 1 || s.is_active === true || s.is_active === "1");
+      if (!active) return false;
+      if (currentFilterTagId === 'all') return true;
+      return String(s.scheduleTag) === String(currentFilterTagId);
+    });
+
+    // 日付ごとのスケジュール配列マップを作成
+    const dateScheduleMap = {};
+    activeItems.forEach(item => {
+      if (!item.schedule_at) return;
+      const dStr = item.schedule_at.split(' ')[0].trim();
+      if (!dateScheduleMap[dStr]) {
+        dateScheduleMap[dStr] = [];
+      }
+      dateScheduleMap[dStr].push(item);
+    });
+
+    // 現在週の7日間の日付を算出（月曜〜日曜）
+    const weekDates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(currentWeekMonday, i);
+      weekDates.push({
+        dateObj: d,
+        ymd: toYMD(d),
+        month: d.getMonth() + 1,
+        day: d.getDate(),
+        ...WEEK_DAYS[i]
+      });
+    }
+
+    // 初回ロード時、または選択中の日付が当週に含まれていない場合のスマート選択
+    const isSelectedInWeek = weekDates.some(w => w.ymd === selectedDateYMD);
+    if (isInitial || !isSelectedInWeek) {
+      // 1. 今日に予定があれば今日
+      if (dateScheduleMap[todayYMD] && dateScheduleMap[todayYMD].length > 0 && weekDates.some(w => w.ymd === todayYMD)) {
+        selectedDateYMD = todayYMD;
+      } else {
+        // 2. 今日以降（未来）で予定がある直近の日
+        const futureEvent = weekDates.find(w => w.ymd >= todayYMD && dateScheduleMap[w.ymd] && dateScheduleMap[w.ymd].length > 0);
+        if (futureEvent) {
+          selectedDateYMD = futureEvent.ymd;
+        } else {
+          // 3. 当週内のいずれかの予定日
+          const anyEvent = weekDates.find(w => dateScheduleMap[w.ymd] && dateScheduleMap[w.ymd].length > 0);
+          if (anyEvent) {
+            selectedDateYMD = anyEvent.ymd;
+          } else {
+            // 4. 今週であれば今日、他週であれば月曜日
+            selectedDateYMD = weekDates.some(w => w.ymd === todayYMD) ? todayYMD : weekDates[0].ymd;
+          }
+        }
+      }
+      isInitial = false;
+    }
+
+    const startD = weekDates[0];
+    const endD = weekDates[6];
+    const rangeLabel = `${startD.dateObj.getFullYear()}年${startD.month}月${startD.day}日(${startD.ja}) 〜 ${endD.dateObj.getFullYear() !== startD.dateObj.getFullYear() ? endD.dateObj.getFullYear() + '年' : ''}${endD.month}月${endD.day}日(${endD.ja})`;
+
+    const thisWeekMondayYMD = toYMD(getMonday(today));
+    const isCurrentWeek = toYMD(currentWeekMonday) === thisWeekMondayYMD;
+
+    // 1. 週ナビゲーション
+    const navEl = document.createElement('div');
+    navEl.className = 'schedule-week-nav';
+    navEl.innerHTML = `
+      <div class="schedule-nav-controls">
+        <button type="button" class="schedule-nav-btn schedule-nav-prev" aria-label="前の週へ">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>前の週</span>
+        </button>
+        <button type="button" class="schedule-nav-today-btn ${isCurrentWeek ? 'is-disabled' : ''}" aria-label="今週へジャンプ">
+          今週
+        </button>
+        <button type="button" class="schedule-nav-btn schedule-nav-next" aria-label="次の週へ">
+          <span>次の週</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+      <div class="schedule-week-range-text">
+        <span class="schedule-range-icon">📅</span>
+        <span class="schedule-range-dates">${escapeHtml(rangeLabel)}</span>
+      </div>
+    `;
+
+    navEl.querySelector('.schedule-nav-prev').addEventListener('click', () => {
+      currentWeekMonday = addDays(currentWeekMonday, -7);
+      isInitial = true;
+      updateView();
+    });
+
+    navEl.querySelector('.schedule-nav-next').addEventListener('click', () => {
+      currentWeekMonday = addDays(currentWeekMonday, 7);
+      isInitial = true;
+      updateView();
+    });
+
+    navEl.querySelector('.schedule-nav-today-btn').addEventListener('click', () => {
+      currentWeekMonday = getMonday(today);
+      selectedDateYMD = todayYMD;
+      isInitial = true;
+      updateView();
+    });
+
+    container.appendChild(navEl);
+
+    // 2. 7日間カレンダーバー
+    const stripEl = document.createElement('div');
+    stripEl.className = 'schedule-week-strip';
+    stripEl.setAttribute('role', 'tablist');
+    stripEl.setAttribute('aria-label', '週間カレンダー');
+
+    weekDates.forEach((w) => {
+      const itemsForDay = dateScheduleMap[w.ymd] || [];
+      const hasSchedule = itemsForDay.length > 0;
+      const isSelected = (w.ymd === selectedDateYMD);
+      const isToday = (w.ymd === todayYMD);
+
+      const slotBtn = document.createElement('button');
+      slotBtn.type = 'button';
+      slotBtn.className = `schedule-day-slot ${isSelected ? 'active' : ''} ${isToday ? 'is-today' : ''} ${hasSchedule ? 'has-schedule' : ''}`;
+      slotBtn.setAttribute('role', 'tab');
+      slotBtn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+      slotBtn.setAttribute('aria-label', `${w.month}月${w.day}日 ${w.ja}曜日 ${hasSchedule ? `${itemsForDay.length}件の予定` : '予定なし'}`);
+
+      let dowClass = 'dow-weekday';
+      if (w.isSat) dowClass = 'dow-sat';
+      if (w.isSun) dowClass = 'dow-sun';
+
+      slotBtn.innerHTML = `
+        <div class="schedule-day-dow ${dowClass}">${w.ja}</div>
+        <div class="schedule-day-num">${w.day}</div>
+        ${isToday ? '<span class="schedule-today-pill">TODAY</span>' : ''}
+        <div class="schedule-slot-status">
+          ${hasSchedule ? `
+            <span class="schedule-slot-dot"></span>
+            <span class="schedule-slot-badge">${itemsForDay.length}件</span>
+          ` : `
+            <span class="schedule-slot-empty-dot"></span>
+          `}
+        </div>
+        ${isSelected ? '<span class="schedule-slot-pointer"></span>' : ''}
+      `;
+
+      slotBtn.addEventListener('click', () => {
+        if (selectedDateYMD !== w.ymd) {
+          selectedDateYMD = w.ymd;
+          updateView();
+        }
+      });
+
+      stripEl.appendChild(slotBtn);
+    });
+
+    container.appendChild(stripEl);
+
+    // 3. 対象日のぶら下がりタスクエリア
+    const dayTasksArea = document.createElement('div');
+    dayTasksArea.className = 'schedule-day-tasks';
+
+    // 選択日の詳細表示情報
+    const selectedDateObj = weekDates.find(w => w.ymd === selectedDateYMD);
+    let selectedTitle = selectedDateYMD;
+    let selectedDow = '';
+    if (selectedDateObj) {
+      selectedTitle = `${selectedDateObj.month}月${selectedDateObj.day}日`;
+      selectedDow = `(${selectedDateObj.ja})`;
+    } else {
+      const parts = selectedDateYMD.split('-');
+      if (parts.length === 3) {
+        selectedTitle = `${parseInt(parts[1], 10)}月${parseInt(parts[2], 10)}日`;
+      }
+    }
+
+    const currentDayItems = dateScheduleMap[selectedDateYMD] || [];
+    // 時間順にソート（時間が空のものは後ろへ）
+    currentDayItems.sort((a, b) => {
+      const tA = a.time || '99:99';
+      const tB = b.time || '99:99';
+      return tA.localeCompare(tB);
+    });
+
+    // タスクエリアヘッダー
+    const headerEl = document.createElement('div');
+    headerEl.className = 'schedule-tasks-header';
+    headerEl.innerHTML = `
+      <div class="schedule-tasks-heading">
+        <span class="schedule-heading-accent"></span>
+        <h3 class="schedule-day-heading-title">
+          <span class="schedule-day-date-text">${escapeHtml(selectedTitle)} <span class="schedule-day-dow-text">${escapeHtml(selectedDow)}</span></span>
+          <span class="schedule-day-subtext">の予定</span>
+        </h3>
+        <span class="schedule-tasks-count-badge ${currentDayItems.length > 0 ? 'has-count' : 'is-zero'}">
+          ${currentDayItems.length}件
+        </span>
+      </div>
+      ${selectedDateYMD === todayYMD ? '<span class="schedule-today-tag">本日</span>' : ''}
+    `;
+    dayTasksArea.appendChild(headerEl);
+
+    // タスクカード一覧または空表示
+    if (currentDayItems.length === 0) {
+      const emptyBox = document.createElement('div');
+      emptyBox.className = 'schedule-empty-box';
+      emptyBox.innerHTML = `
+        <div class="schedule-empty-icon">☕</div>
+        <p class="schedule-empty-title">この日のスケジュールはありません</p>
+        <p class="schedule-empty-hint">カレンダーの日付をタップすると、その日の予定を確認できます</p>
+      `;
+      dayTasksArea.appendChild(emptyBox);
+    } else {
+      const taskGrid = document.createElement('div');
+      taskGrid.className = 'schedule-tasks-grid';
+
+      currentDayItems.forEach(item => {
+        const tagName = tagMap[item.scheduleTag] || 'イベント';
+        const picUrl = item.picture ? resolveAssetUrl(item.picture, 'schedule') : null;
+        const card = document.createElement('div');
+        card.className = 'schedule-card';
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-label', `${item.title || 'スケジュール'} の詳細を表示`);
+
+        const dateText = item.schedule_at || selectedDateYMD;
+        const timeText = item.time ? `${item.time}〜` : '時間未定';
+
+        card.innerHTML = `
+          <div class="schedule-card-body">
+            <div class="schedule-date-tag-row">
+              <div class="schedule-datetime">
+                <span class="schedule-date">${escapeHtml(dateText)}</span>
+                <span class="schedule-time">${escapeHtml(timeText)}</span>
+              </div>
+              <span class="schedule-tag-badge">${escapeHtml(tagName)}</span>
+            </div>
+            <h4 class="schedule-card-title">${escapeHtml(item.title)}</h4>
+            <div class="schedule-card-footer">
+              <span>詳細を見る</span>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          openScheduleModal(item, tagName, picUrl);
+        });
+
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openScheduleModal(item, tagName, picUrl);
+          }
+        });
+
+        taskGrid.appendChild(card);
+      });
+
+      dayTasksArea.appendChild(taskGrid);
+    }
+
+    container.appendChild(dayTasksArea);
+  }
+
+  // タブクリックイベント
   tabContainer.addEventListener('click', (e) => {
     const target = e.target.closest('.filter-tab');
     if (!target) return;
     tabContainer.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     target.classList.add('active');
-    displaySchedules(target.dataset.tagId);
+    currentFilterTagId = target.dataset.tagId;
+    updateView();
   });
 
-  displaySchedules('all');
+  // 初回描画
+  updateView();
 }
 
 function renderGalleries(galleries) {
@@ -1074,6 +1383,57 @@ function closeShopModal() {
   document.body.style.overflow = '';
 }
 
+function openScheduleModal(item, tagName, picUrl) {
+  const modal = document.getElementById('schedule-modal');
+  if (!modal) return;
+
+  const dateEl = document.getElementById('schedule-modal-date');
+  const timeEl = document.getElementById('schedule-modal-time');
+  const tagEl = document.getElementById('schedule-modal-tag');
+  const titleEl = document.getElementById('schedule-modal-title');
+  const imgWrap = document.getElementById('schedule-modal-img-wrap');
+  const imgEl = document.getElementById('schedule-modal-img');
+  const detailEl = document.getElementById('schedule-modal-detail');
+
+  if (dateEl) dateEl.textContent = item.schedule_at || '';
+  if (timeEl) timeEl.textContent = item.time ? `${item.time}〜` : '';
+  if (tagEl) tagEl.textContent = tagName || 'イベント';
+  if (titleEl) titleEl.textContent = item.title || '';
+
+  if (imgWrap && imgEl) {
+    if (picUrl) {
+      imgEl.src = picUrl;
+      imgEl.alt = item.title || 'スケジュール画像';
+      imgWrap.style.display = 'block';
+    } else {
+      imgEl.src = '';
+      imgWrap.style.display = 'none';
+    }
+  }
+
+  if (detailEl) {
+    if (item.detail) {
+      detailEl.textContent = item.detail;
+      detailEl.style.display = 'block';
+    } else {
+      detailEl.textContent = '';
+      detailEl.style.display = 'none';
+    }
+  }
+
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeScheduleModal() {
+  const modal = document.getElementById('schedule-modal');
+  if (!modal) return;
+  modal.classList.remove('is-open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
 
 // ============================================================
 // 5. ユーティリティ
@@ -1178,12 +1538,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('video-modal-backdrop')?.addEventListener('click', closeVideoModal);
   document.getElementById('shop-modal-close')?.addEventListener('click', closeShopModal);
   document.getElementById('shop-modal-backdrop')?.addEventListener('click', closeShopModal);
+  document.getElementById('schedule-modal-close')?.addEventListener('click', closeScheduleModal);
+  document.getElementById('schedule-modal-backdrop')?.addEventListener('click', closeScheduleModal);
 
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeImageModal();
       closeVideoModal();
       closeShopModal();
+      closeScheduleModal();
     }
   });
 

@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
   
   <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css?v=1.6">
+  <link rel="stylesheet" href="css/style.css?v=1.9">
 </head>
 <body>
   <!-- ページ全体の固定背景画像レイヤー (マスクなし) -->
@@ -247,9 +247,9 @@
           <!-- JSで動的生成 -->
         </div>
 
-        <!-- スケジュールカード一覧 -->
-        <div class="schedule-grid" id="schedule-container">
-          <!-- JSでschedule.yaml準拠のデータをレンダリング -->
+        <!-- 週間カレンダー ＆ スケジュールタスク一覧コンテナ -->
+        <div class="schedule-calendar-wrapper" id="schedule-container">
+          <!-- JSで1週間カレンダーと対象日のタスクをレンダリング -->
         </div>
       </div>
     </section>
@@ -403,6 +403,30 @@
       <div class="shop-modal-subtitle">購入先プラットフォームを選択</div>
       <div class="shop-modal-links" id="shop-modal-links">
         <!-- JSで動的にボタン生成 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- スケジュール詳細モーダル -->
+  <div class="modal-overlay" id="schedule-modal" aria-hidden="true">
+    <div class="modal-backdrop" id="schedule-modal-backdrop"></div>
+    <div class="modal-content schedule-modal-content">
+      <button class="modal-close" id="schedule-modal-close" aria-label="閉じる">&times;</button>
+      <div class="schedule-modal-header">
+        <div class="schedule-modal-meta">
+          <div class="schedule-datetime">
+            <span class="schedule-date" id="schedule-modal-date"></span>
+            <span class="schedule-time" id="schedule-modal-time"></span>
+          </div>
+          <span class="schedule-tag-badge" id="schedule-modal-tag"></span>
+        </div>
+        <h3 class="schedule-modal-title" id="schedule-modal-title"></h3>
+      </div>
+      <div class="schedule-modal-body">
+        <div class="schedule-modal-img-wrap" id="schedule-modal-img-wrap">
+          <img src="" alt="" id="schedule-modal-img">
+        </div>
+        <div class="schedule-modal-detail" id="schedule-modal-detail"></div>
       </div>
     </div>
   </div>
