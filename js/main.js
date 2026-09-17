@@ -701,7 +701,15 @@ function renderMovies(labels, movies) {
 function renderShops(tags, shops) {
   const tabContainer = document.getElementById('shop-filter-tabs');
   const gridContainer = document.getElementById('shop-container');
+  let paginationContainer = document.getElementById('shop-pagination');
   if (!tabContainer || !gridContainer) return;
+
+  if (!paginationContainer) {
+    paginationContainer = document.createElement('div');
+    paginationContainer.id = 'shop-pagination';
+    paginationContainer.className = 'shop-pagination';
+    gridContainer.after(paginationContainer);
+  }
 
   const tagMap = {};
   if (Array.isArray(tags)) {
@@ -719,10 +727,79 @@ function renderShops(tags, shops) {
     });
   }
 
-  function displayShops(filterTag = 'all') {
-    gridContainer.innerHTML = '';
-    const items = Array.isArray(shops) ? shops : [];
+  let currentFilterTag = 'all';
+  let currentPage = 1;
 
+  // 画面幅に応じた1ページあたりの件数判定
+  // PC画面（> 860px）: 4列 × 2行 = 8件
+  // スマホなどの縦長画面（<= 860px）: 2列 × 3行 = 6件
+  function getItemsPerPage() {
+    return window.innerWidth <= 860 ? 6 : 8;
+  }
+
+  function renderPagination(totalPages) {
+    if (!paginationContainer) return;
+    paginationContainer.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    // 前へボタン
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'shop-page-btn shop-page-prev';
+    prevBtn.innerHTML = '&lt; 前へ';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        displayShops(currentFilterTag, currentPage - 1, true);
+      }
+    });
+    paginationContainer.appendChild(prevBtn);
+
+    // ページ番号ボタン
+    for (let p = 1; p <= totalPages; p++) {
+      if (totalPages > 7) {
+        if (p !== 1 && p !== totalPages && Math.abs(p - currentPage) > 1) {
+          if (p === 2 || p === totalPages - 1) {
+            const ellipsis = document.createElement('span');
+            ellipsis.className = 'shop-page-ellipsis';
+            ellipsis.textContent = '…';
+            paginationContainer.appendChild(ellipsis);
+          }
+          continue;
+        }
+      }
+
+      const pageBtn = document.createElement('button');
+      pageBtn.className = `shop-page-btn ${p === currentPage ? 'active' : ''}`;
+      pageBtn.textContent = p;
+      if (p === currentPage) {
+        pageBtn.disabled = true;
+      } else {
+        pageBtn.addEventListener('click', () => {
+          displayShops(currentFilterTag, p, true);
+        });
+      }
+      paginationContainer.appendChild(pageBtn);
+    }
+
+    // 次へボタン
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'shop-page-btn shop-page-next';
+    nextBtn.innerHTML = '次へ &gt;';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        displayShops(currentFilterTag, currentPage + 1, true);
+      }
+    });
+    paginationContainer.appendChild(nextBtn);
+  }
+
+  function displayShops(filterTag = 'all', page = 1, scrollToTop = false) {
+    currentFilterTag = filterTag;
+    currentPage = page;
+    gridContainer.innerHTML = '';
+
+    const items = Array.isArray(shops) ? shops : [];
     const filtered = items.filter(s => {
       if (filterTag === 'all') return true;
       return String(s.shopTag) === String(filterTag);
@@ -730,12 +807,22 @@ function renderShops(tags, shops) {
 
     if (filtered.length === 0) {
       gridContainer.innerHTML = '<p class="text-muted" style="text-align:center;grid-column:1/-1;padding:30px;">グッズはありません。</p>';
+      if (paginationContainer) paginationContainer.innerHTML = '';
       return;
     }
 
     filtered.sort((a, b) => (a.priority || 0) - (b.priority || 0));
 
-    filtered.forEach(item => {
+    const itemsPerPage = getItemsPerPage();
+    const totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
+
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const pageItems = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+    pageItems.forEach(item => {
       const tagName = tagMap[item.shopTag] || 'グッズ';
       const imgUrl = resolveAssetUrl(item.merchandiseImage, 'shop');
       const card = document.createElement('div');
@@ -770,6 +857,15 @@ function renderShops(tags, shops) {
 
       gridContainer.appendChild(card);
     });
+
+    renderPagination(totalPages);
+
+    if (scrollToTop) {
+      const sectionEl = document.getElementById('sec-shop');
+      if (sectionEl) {
+        sectionEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
   }
 
   tabContainer.addEventListener('click', (e) => {
@@ -777,10 +873,20 @@ function renderShops(tags, shops) {
     if (!target) return;
     tabContainer.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     target.classList.add('active');
-    displayShops(target.dataset.shopTag);
+    displayShops(target.dataset.shopTag, 1, false);
   });
 
-  displayShops('all');
+  // 画面リサイズ時に1ページあたり件数が切り替わったら再描画
+  let lastItemsPerPage = getItemsPerPage();
+  window.addEventListener('resize', () => {
+    const newItemsPerPage = getItemsPerPage();
+    if (newItemsPerPage !== lastItemsPerPage) {
+      lastItemsPerPage = newItemsPerPage;
+      displayShops(currentFilterTag, 1, false);
+    }
+  });
+
+  displayShops('all', 1, false);
 }
 
 function renderLinks(linkLists) {
