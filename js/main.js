@@ -273,9 +273,34 @@ function renderProfileAndVisual(profile, visuals) {
     if (profile.name) {
       document.title = `${profile.name} Official Website`;
     }
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && (profile.comment || profile.name)) {
+      metaDesc.content = `${profile.name || ''} オフィシャルサイト。${profile.comment || ''}`.trim();
+    }
+
     const logoEl = document.querySelector('.logo-text');
-    if (logoEl && (profile.romanization || profile.name)) {
-      logoEl.textContent = profile.romanization || profile.name;
+    if (logoEl) {
+      logoEl.textContent = profile.romanization || profile.name || '';
+    }
+
+    // ヘッダーSNSリンク
+    const navYt = document.getElementById('nav-sns-yt');
+    if (navYt) {
+      if (profile.youtubeUrl) {
+        navYt.href = profile.youtubeUrl;
+        navYt.style.display = '';
+      } else {
+        navYt.style.display = 'none';
+      }
+    }
+    const navX = document.getElementById('nav-sns-x');
+    if (navX) {
+      if (profile.xUrl) {
+        navX.href = profile.xUrl;
+        navX.style.display = '';
+      } else {
+        navX.style.display = 'none';
+      }
     }
 
     setText('prof-name', profile.name);
@@ -285,21 +310,61 @@ function renderProfileAndVisual(profile, visuals) {
     setText('prof-comment', profile.comment);
     
     const msgEl = document.getElementById('prof-message');
-    if (msgEl && profile.message) {
-      msgEl.innerHTML = escapeHtml(profile.message).replace(/\n/g, '<br>');
+    if (msgEl) {
+      msgEl.innerHTML = profile.message ? escapeHtml(profile.message).replace(/\n/g, '<br>') : '';
     }
 
     setText('prof-birthday', profile.birthday);
     setText('prof-streaming', profile.streaming);
-    setText('prof-age', profile.age);
-    setText('prof-height', profile.height);
+
+    const ageEl = document.getElementById('prof-age');
+    const ageUnitEl = document.getElementById('prof-age-unit');
+    if (ageEl) ageEl.textContent = (profile.age !== undefined && profile.age !== null) ? profile.age : '';
+    if (ageUnitEl) ageUnitEl.textContent = (profile.age !== undefined && profile.age !== null && String(profile.age).trim() !== '') ? ' 歳' : '';
+
+    const heightEl = document.getElementById('prof-height');
+    const heightUnitEl = document.getElementById('prof-height-unit');
+    if (heightEl) heightEl.textContent = (profile.height !== undefined && profile.height !== null) ? profile.height : '';
+    if (heightUnitEl) heightUnitEl.textContent = (profile.height !== undefined && profile.height !== null && String(profile.height).trim() !== '') ? ' cm' : '';
+
     setText('prof-fanName', profile.fanName);
 
+    // プロフィール内 SNSリンク
     const ytEl = document.getElementById('prof-youtube');
-    if (ytEl && profile.youtubeUrl) ytEl.href = profile.youtubeUrl;
+    if (ytEl) {
+      if (profile.youtubeUrl) {
+        ytEl.href = profile.youtubeUrl;
+        ytEl.style.display = '';
+      } else {
+        ytEl.style.display = 'none';
+      }
+    }
     
     const xEl = document.getElementById('prof-x');
-    if (xEl && profile.xUrl) xEl.href = profile.xUrl;
+    if (xEl) {
+      if (profile.xUrl) {
+        xEl.href = profile.xUrl;
+        xEl.style.display = '';
+      } else {
+        xEl.style.display = 'none';
+      }
+    }
+
+    // フッターブランド＆コピーライト
+    const footerBrand = document.getElementById('footer-brand-name');
+    if (footerBrand) {
+      footerBrand.textContent = profile.name ? `${profile.name} Official Web` : 'Official Web';
+    }
+    const footerDesc = document.getElementById('footer-brand-desc');
+    if (footerDesc) {
+      footerDesc.textContent = profile.comment || '';
+    }
+    const footerCopy = document.getElementById('footer-copyright');
+    if (footerCopy) {
+      const year = new Date().getFullYear();
+      const nameStr = profile.romanization || profile.name || 'Official Web';
+      footerCopy.innerHTML = `&copy; ${year} ${escapeHtml(nameStr)}. All Rights Reserved.`;
+    }
 
     // platforms (配列・JSON文字列・または platforms_link_1..3 に対応)
     let platforms = [];

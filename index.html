@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>星乃ルナ Official Website | バーチャルナビゲーター</title>
-  <meta name="description" content="見習い星読みバーチャルナビゲーター「星乃ルナ」の公式ポートフォリオ・オフィシャルサイトです。最新のお知らせ、スケジュール、動画、グッズ情報をお届けします。">
+  <title>Official Website</title>
+  <meta name="description" content="公式ポートフォリオ・オフィシャルサイトです。最新のお知らせ、スケジュール、動画、グッズ情報をお届けします。">
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
   
   <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css?v=1.9">
+  <link rel="stylesheet" href="css/style.css?v=2.2">
 </head>
 <body>
   <!-- ページ全体の固定背景画像レイヤー (マスクなし) -->
@@ -25,7 +25,7 @@
     <div class="nav-container">
       <a href="#sec-profile" class="nav-logo">
         <span class="logo-symbol">✦</span>
-        <span class="logo-text">Luna Hoshino</span>
+        <span class="logo-text"></span>
       </a>
 
       <!-- 動的に同期されるナビゲーションリンク -->
@@ -41,10 +41,10 @@
 
       <!-- ヘッダーSNSリンク -->
       <div class="nav-sns">
-        <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="sns-btn" aria-label="YouTube">
+        <a href="#" target="_blank" rel="noopener noreferrer" class="sns-btn" id="nav-sns-yt" aria-label="YouTube">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
         </a>
-        <a href="https://x.com/" target="_blank" rel="noopener noreferrer" class="sns-btn" aria-label="X (Twitter)">
+        <a href="#" target="_blank" rel="noopener noreferrer" class="sns-btn" id="nav-sns-x" aria-label="X (Twitter)">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         </a>
       </div>
@@ -78,28 +78,22 @@
         <!-- ネームヘッダー -->
         <div class="profile-header">
           <div class="profile-rubies">
-            <span class="profile-furigana" id="prof-pronunciation">ほしの るな</span>
-            <span class="profile-roman" id="prof-romanization">Luna Hoshino</span>
+            <span class="profile-furigana" id="prof-pronunciation"></span>
+            <span class="profile-roman" id="prof-romanization"></span>
           </div>
-          <h1 class="profile-name" id="prof-name">星乃 ルナ</h1>
+          <h1 class="profile-name" id="prof-name"></h1>
           <div class="profile-nickname-badge">
             <span class="label">Nickname</span>
-            <span class="value" id="prof-nickname">るなち / ルナちゃん</span>
+            <span class="value" id="prof-nickname"></span>
           </div>
         </div>
 
         <!-- キャッチフレーズ (comment) -->
-        <div class="profile-tagline" id="prof-comment">
-          夜空からあなたの心に星の光をお届け！見習い星読みバーチャルナビゲーター✨
-        </div>
+        <div class="profile-tagline" id="prof-comment"></div>
 
         <!-- 自己紹介文 (message) -->
         <div class="profile-message-box">
-          <p id="prof-message">
-            はじめまして！星乃ルナです🌟<br>
-            普段はYouTubeを中心に、ゲーム実況や歌枠、まったり雑談、作業用ASMR配信などを楽しくお届けしています。<br>
-            みんなと一緒にあたたかい居場所を作っていけたら嬉しいです！チャンネル登録・SNSフォローよろしくね！
-          </p>
+          <p id="prof-message"></p>
         </div>
 
         <!-- プロフィールスペック ＆ 制作クレジットのカードコンテナ -->
@@ -110,23 +104,23 @@
             <dl class="specs-list" id="specs-list">
               <div class="spec-row">
                 <dt><span class="spec-icon">🎂</span> 誕生日</dt>
-                <dd id="prof-birthday">07月15日</dd>
+                <dd id="prof-birthday"></dd>
               </div>
               <div class="spec-row">
                 <dt><span class="spec-icon">🚀</span> 活動開始日</dt>
-                <dd id="prof-streaming">2023年10月01日</dd>
+                <dd id="prof-streaming"></dd>
               </div>
               <div class="spec-row">
                 <dt><span class="spec-icon">✨</span> 年齢</dt>
-                <dd><span id="prof-age">18</span> 歳</dd>
+                <dd><span id="prof-age"></span><span id="prof-age-unit"></span></dd>
               </div>
               <div class="spec-row">
                 <dt><span class="spec-icon">📏</span> 身長</dt>
-                <dd><span id="prof-height">152</span> cm</dd>
+                <dd><span id="prof-height"></span><span id="prof-height-unit"></span></dd>
               </div>
               <div class="spec-row">
                 <dt><span class="spec-icon">💫</span> ファンネーム</dt>
-                <dd id="prof-fanName">ステラメイト</dd>
+                <dd id="prof-fanName"></dd>
               </div>
             </dl>
           </div>
@@ -137,19 +131,19 @@
             <dl class="credits-list" id="credits-list">
               <div class="credit-row">
                 <dt>キャラクターデザイン</dt>
-                <dd id="credit-characterDesign">星空 イラスト</dd>
+                <dd id="credit-characterDesign"></dd>
               </div>
               <div class="credit-row">
                 <dt>イラストレーター</dt>
-                <dd id="credit-illustrator">星空 イラスト</dd>
+                <dd id="credit-illustrator"></dd>
               </div>
               <div class="credit-row">
                 <dt>Live2Dモデラー</dt>
-                <dd id="credit-live2d">スタジオ・モデリング</dd>
+                <dd id="credit-live2d"></dd>
               </div>
               <div class="credit-row" id="credit-row-3d">
                 <dt>3Dモデラー</dt>
-                <dd id="credit-3dModeling">3Dクラフト Lab</dd>
+                <dd id="credit-3dModeling"></dd>
               </div>
             </dl>
           </div>
@@ -160,12 +154,12 @@
           <div class="channel-title">✦ OFFICIAL CHANNELS & PLATFORMS ✦</div>
           <div class="channel-buttons" id="prof-platforms">
             <!-- YouTube メイン -->
-            <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="channel-link yt-link" id="prof-youtube">
+            <a href="#" target="_blank" rel="noopener noreferrer" class="channel-link yt-link" id="prof-youtube">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
               <span>YouTube Channel</span>
             </a>
             <!-- X (Twitter) -->
-            <a href="https://x.com/" target="_blank" rel="noopener noreferrer" class="channel-link x-link" id="prof-x">
+            <a href="#" target="_blank" rel="noopener noreferrer" class="channel-link x-link" id="prof-x">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               <span>Official X</span>
             </a>
@@ -189,8 +183,8 @@
         <div class="visual-stage">
           <div class="visual-card">
             <!-- 立ち絵画像 (JSで動的切り替え可能) -->
-            <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&auto=format&fit=crop&q=80" 
-                 alt="立ち絵メインビジュアル" 
+            <img src="" 
+                 alt="" 
                  id="current-visual-img" 
                  class="visual-img">
           </div>
@@ -351,11 +345,11 @@
   <footer class="site-footer">
     <div class="container footer-container">
       <div class="footer-brand">
-        <span class="brand-name">星乃ルナ Official Web</span>
-        <p class="brand-desc">見習い星読みバーチャルナビゲーター</p>
+        <span class="brand-name" id="footer-brand-name"></span>
+        <p class="brand-desc" id="footer-brand-desc"></p>
       </div>
       <div class="footer-copy">
-        <p>&copy; 2026 Luna Hoshino. All Rights Reserved.</p>
+        <p id="footer-copyright"></p>
       </div>
       <a href="#sec-profile" class="back-to-top" aria-label="トップへ戻る">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
@@ -396,8 +390,8 @@
       <div class="shop-modal-header">
         <img src="" alt="" id="shop-modal-thumb" class="shop-modal-thumb">
         <div class="shop-modal-info">
-          <h4 id="shop-modal-title" class="shop-modal-title">商品名</h4>
-          <div id="shop-modal-price" class="shop-modal-price">¥0</div>
+          <h4 id="shop-modal-title" class="shop-modal-title"></h4>
+          <div id="shop-modal-price" class="shop-modal-price"></div>
         </div>
       </div>
       <div class="shop-modal-subtitle">購入先プラットフォームを選択</div>
