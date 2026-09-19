@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
   
   <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css?v=2.2">
+  <link rel="stylesheet" href="css/style.css?v=2.5">
 </head>
 <body>
   <!-- ページ全体の固定背景画像レイヤー (マスクなし) -->
@@ -261,8 +261,16 @@
         </div>
 
         <!-- ギャラリー画像グリッド -->
-        <div class="gallery-grid" id="gallery-container">
-          <!-- JSでgallery.yaml準拠のデータをレンダリング -->
+        <div class="scroll-grid-wrapper">
+          <button class="scroll-nav-btn prev-btn" id="gallery-prev-btn" aria-label="前の画像へ" title="前へ">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <div class="gallery-grid" id="gallery-container">
+            <!-- JSでgallery.yaml準拠のデータをレンダリング -->
+          </div>
+          <button class="scroll-nav-btn next-btn" id="gallery-next-btn" aria-label="次の画像へ" title="次へ">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
         </div>
       </div>
     </section>
@@ -285,8 +293,16 @@
         </div>
 
         <!-- 動画カード一覧 -->
-        <div class="movie-grid" id="movie-container">
-          <!-- JSでmovie.yaml準拠のデータをレンダリング -->
+        <div class="scroll-grid-wrapper">
+          <button class="scroll-nav-btn prev-btn" id="movie-prev-btn" aria-label="前の動画へ" title="前へ">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <div class="movie-grid" id="movie-container">
+            <!-- JSでmovie.yaml準拠のデータをレンダリング -->
+          </div>
+          <button class="scroll-nav-btn next-btn" id="movie-next-btn" aria-label="次の動画へ" title="次へ">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
         </div>
       </div>
     </section>

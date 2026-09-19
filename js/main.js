@@ -954,11 +954,15 @@ function renderSchedules(tags, schedules) {
 
 function renderGalleries(galleries) {
   const container = document.getElementById('gallery-container');
+  const prevBtn = document.getElementById('gallery-prev-btn');
+  const nextBtn = document.getElementById('gallery-next-btn');
   if (!container) return;
   container.innerHTML = '';
 
   if (!Array.isArray(galleries) || galleries.length === 0) {
     container.innerHTML = '<p class="text-muted" style="text-align:center;grid-column:1/-1;padding:30px;">ギャラリー画像はまだありません。</p>';
+    if (prevBtn) prevBtn.classList.add('is-disabled');
+    if (nextBtn) nextBtn.classList.add('is-disabled');
     return;
   }
 
@@ -985,11 +989,170 @@ function renderGalleries(galleries) {
 
     container.appendChild(card);
   });
+
+  enableDragScroll(container);
+  enableWheelScroll(container);
+  setupScrollNav(container, prevBtn, nextBtn);
+}
+
+/**
+ * 1列分のスクロールステップ幅を取得（カード幅 + gap）
+ */
+function getColumnStep(container) {
+  const card = container.querySelector('.gallery-card, .movie-card');
+  if (!card) return 280;
+  const rect = card.getBoundingClientRect();
+  const style = window.getComputedStyle(container);
+  const gap = parseFloat(style.columnGap || style.gap) || 16;
+  return rect.width + gap;
+}
+
+/**
+ * 左右ナビゲーションボタン（＜ ＞）の表示・無効化状態を更新
+ */
+function updateNavButtons(container, prevBtn, nextBtn) {
+  if (!container || !prevBtn || !nextBtn) return;
+  const maxScroll = container.scrollWidth - container.clientWidth;
+  if (maxScroll <= 2) {
+    prevBtn.classList.add('is-disabled');
+    nextBtn.classList.add('is-disabled');
+    return;
+  }
+  if (container.scrollLeft <= 4) {
+    prevBtn.classList.add('is-disabled');
+  } else {
+    prevBtn.classList.remove('is-disabled');
+  }
+
+  if (container.scrollLeft >= maxScroll - 4) {
+    nextBtn.classList.add('is-disabled');
+  } else {
+    nextBtn.classList.remove('is-disabled');
+  }
+}
+
+/**
+ * 左右ナビゲーションボタン（＜ ＞）の1列スクロール操作をセットアップ
+ */
+function setupScrollNav(container, prevBtn, nextBtn) {
+  if (!container || !prevBtn || !nextBtn) return;
+
+  if (!container.dataset.navInit) {
+    container.dataset.navInit = 'true';
+
+    prevBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const step = getColumnStep(container);
+      container.scrollBy({ left: -step, behavior: 'smooth' });
+    });
+
+    nextBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const step = getColumnStep(container);
+      container.scrollBy({ left: step, behavior: 'smooth' });
+    });
+
+    container.addEventListener('scroll', () => {
+      updateNavButtons(container, prevBtn, nextBtn);
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+      updateNavButtons(container, prevBtn, nextBtn);
+    });
+  }
+
+  setTimeout(() => {
+    updateNavButtons(container, prevBtn, nextBtn);
+  }, 60);
+}
+
+/**
+ * 横スクロールコンテナのマウスドラッグ操作を有効化
+ */
+function enableDragScroll(element) {
+  if (!element || element.dataset.dragScrollInit) return;
+  element.dataset.dragScrollInit = 'true';
+
+  let isDown = false;
+  let startX = 0;
+  let scrollLeft = 0;
+  let hasDragged = false;
+
+  element.addEventListener('dragstart', (e) => e.preventDefault());
+
+  element.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return; // 左クリックのみ
+    if (e.target.closest('button') || e.target.closest('a')) return;
+    isDown = true;
+    hasDragged = false;
+    startX = e.pageX - element.offsetLeft;
+    scrollLeft = element.scrollLeft;
+    element.style.scrollBehavior = 'auto';
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (isDown) {
+      isDown = false;
+      element.style.scrollBehavior = '';
+      setTimeout(() => {
+        element.classList.remove('is-dragging');
+        hasDragged = false;
+      }, 50);
+    }
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    const x = e.pageX - element.offsetLeft;
+    const walk = (x - startX) * 1.25;
+    if (Math.abs(walk) > 4) {
+      hasDragged = true;
+      element.classList.add('is-dragging');
+      e.preventDefault();
+      element.scrollLeft = scrollLeft - walk;
+    }
+  });
+
+  element.addEventListener('click', (e) => {
+    if (hasDragged) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+}
+
+/**
+ * マウスホイールによる横スクロール操作を有効化
+ * （端に達した際は通常の縦スクロールを妨げない設計）
+ */
+function enableWheelScroll(element) {
+  if (!element || element.dataset.wheelScrollInit) return;
+  element.dataset.wheelScrollInit = 'true';
+
+  element.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+
+    const maxScroll = element.scrollWidth - element.clientWidth;
+    if (maxScroll <= 1) return;
+
+    const isScrollingDown = e.deltaY > 0;
+    const isScrollingUp = e.deltaY < 0;
+
+    const canScrollRight = element.scrollLeft < maxScroll - 2;
+    const canScrollLeft = element.scrollLeft > 2;
+
+    if ((isScrollingDown && canScrollRight) || (isScrollingUp && canScrollLeft)) {
+      e.preventDefault();
+      element.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
 }
 
 function renderMovies(labels, movies) {
   const tabContainer = document.getElementById('movie-filter-tabs');
   const gridContainer = document.getElementById('movie-container');
+  const prevBtn = document.getElementById('movie-prev-btn');
+  const nextBtn = document.getElementById('movie-next-btn');
   if (!tabContainer || !gridContainer) return;
 
   const labelMap = {};
@@ -1021,13 +1184,14 @@ function renderMovies(labels, movies) {
 
     if (filtered.length === 0) {
       gridContainer.innerHTML = '<p class="text-muted" style="text-align:center;grid-column:1/-1;padding:30px;">動画はありません。</p>';
+      if (prevBtn) prevBtn.classList.add('is-disabled');
+      if (nextBtn) nextBtn.classList.add('is-disabled');
       return;
     }
 
     filtered.forEach(item => {
       const tagName = labelMap[item.tagLabel] || '動画';
       
-      // サムネイルURL判定（未入力の場合はYouTube動画IDから高画質maxresdefaultを優先、非対応時はhqdefaultへフォールバック）
       let imgUrl = item.imageUrl ? resolveAssetUrl(item.imageUrl, 'movie') : '';
       let fallbackImgUrl = '';
       if (!imgUrl && item.videoUrl) {
@@ -1059,6 +1223,11 @@ function renderMovies(labels, movies) {
 
       gridContainer.appendChild(card);
     });
+
+    gridContainer.scrollLeft = 0;
+    setTimeout(() => {
+      updateNavButtons(gridContainer, prevBtn, nextBtn);
+    }, 60);
   }
 
   tabContainer.addEventListener('click', (e) => {
@@ -1070,6 +1239,9 @@ function renderMovies(labels, movies) {
   });
 
   displayMovies('all');
+  enableDragScroll(gridContainer);
+  enableWheelScroll(gridContainer);
+  setupScrollNav(gridContainer, prevBtn, nextBtn);
 }
 
 function renderShops(tags, shops) {

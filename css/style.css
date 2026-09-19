@@ -5,9 +5,13 @@
 /* --- CSS変数（テーマ定義） --- */
 :root {
   --bg-main: #0a0e1a;
-  --bg-card: rgba(10, 25, 54, 0.78); /* ネイビー半透明 */
-  --bg-card-hover: rgba(18, 38, 80, 0.88); /* ホバー時ネイビー */
-  --bg-glass: rgba(10, 22, 48, 0.68);
+  --bg-card: linear-gradient(to top left, rgba(24, 64, 144, 0.84) 0%, rgba(8, 20, 58, 0.92) 100%);
+  --bg-card-hover: linear-gradient(to top left, rgba(32, 84, 184, 0.92) 0%, rgba(12, 28, 78, 0.96) 100%);
+  /* 右下から左上にかけて深みが出るグラデーション (to top left: 右下0% → 左上100%) */
+  --bg-card-gradient: linear-gradient(to top left, rgba(24, 64, 144, 0.84) 0%, rgba(8, 20, 58, 0.92) 100%);
+  --bg-card-hover-gradient: linear-gradient(to top left, rgba(32, 84, 184, 0.92) 0%, rgba(12, 28, 78, 0.96) 100%);
+  --bg-modal-gradient: linear-gradient(to top left, rgba(24, 64, 144, 0.94) 0%, rgba(8, 20, 58, 0.98) 100%);
+  --bg-glass: rgba(12, 28, 68, 0.70);
   
   --primary: #7c3aed;
   --primary-light: #a78bfa;
@@ -150,7 +154,25 @@ ul, ol {
   transform: scale(1.06);
 }
 
-/* カード内コンテンツをロゴの手前に配置 */
+/* モーダル背景ロゴ透かし (Watermark) */
+.schedule-modal-content::before,
+.shop-modal-content::before {
+  content: '';
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 180px;
+  height: 180px;
+  background-image: url('../assets/logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.09;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* カード＆モーダル内コンテンツをロゴの手前に配置 */
 .notice-card > *,
 .schedule-card-body,
 .movie-thumb-wrapper,
@@ -163,7 +185,12 @@ ul, ol {
 .credits-list,
 .schedule-tasks-header,
 .schedule-tasks-grid,
-.schedule-empty-box {
+.schedule-empty-box,
+.schedule-modal-header,
+.schedule-modal-body,
+.shop-modal-header,
+.shop-modal-subtitle,
+.shop-modal-links {
   position: relative;
   z-index: 1;
 }
@@ -1483,6 +1510,7 @@ ul, ol {
   transform: translateY(-4px);
   border-color: rgba(6, 182, 212, 0.6);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), 0 0 20px rgba(6, 182, 212, 0.2);
+  background: var(--bg-card-hover);
 }
 
 .schedule-card-body {
@@ -1532,19 +1560,21 @@ ul, ol {
 .schedule-card-title {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #fff;
+  color: #ffffff;
   line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   margin: 0;
-  flex-grow: 1;
 }
 
 .schedule-card-footer {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 4px;
+  font-size: 0.82rem;
   color: var(--accent-cyan);
-  font-size: 0.8rem;
   font-weight: 600;
   opacity: 0.85;
   margin-top: 4px;
@@ -1560,16 +1590,18 @@ ul, ol {
    スケジュール詳細モーダル
    ============================================================ */
 .modal-content.schedule-modal-content {
-  background: #111625;
-  border: 1px solid rgba(167, 139, 250, 0.35);
+  background: var(--bg-modal-gradient);
+  border: 1px solid rgba(56, 189, 248, 0.35);
   border-radius: 20px;
   max-width: 520px;
   width: 92%;
   padding: 26px 24px 24px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), 0 0 35px rgba(124, 58, 237, 0.2);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 35px rgba(24, 64, 144, 0.3);
   position: relative;
   max-height: 88vh;
   overflow-y: auto;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .schedule-modal-header {
@@ -1640,14 +1672,124 @@ ul, ol {
 /* ============================================================
    3. ギャラリーセクション (Gallery)
    ============================================================ */
-.gallery-section {
+/* ============================================================
+   3. ギャラリーセクション (Gallery) & 4. 動画リスト (Movie)
+   2行横スクロールグリッド共通スタイル
+   ============================================================ */
+.gallery-section,
+.movie-section {
   background: transparent;
 }
 
-.gallery-grid {
+/* 横スクロールグリッド ラッパー ＆ 左右ナビゲーションボタン */
+.scroll-grid-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.scroll-nav-btn {
+  position: absolute;
+  top: calc(50% - 10px);
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(12, 28, 68, 0.90);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 15;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55), 0 0 14px rgba(56, 189, 248, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all var(--transition-fast);
+  opacity: 1;
+}
+
+.scroll-nav-btn.prev-btn {
+  left: -20px;
+}
+
+.scroll-nav-btn.next-btn {
+  right: -20px;
+}
+
+.scroll-nav-btn:hover {
+  background: rgba(24, 64, 144, 0.96);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.65), 0 0 20px rgba(56, 189, 248, 0.55);
+  transform: translateY(-50%) scale(1.08);
+  color: #38bdf8;
+}
+
+.scroll-nav-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.scroll-nav-btn.is-disabled {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) scale(0.85);
+}
+
+.gallery-grid,
+.movie-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
+  grid-template-rows: repeat(2, auto);
+  grid-auto-flow: column;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 4px 20px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.6) rgba(10, 20, 48, 0.6);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gallery-grid img,
+.movie-grid img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.gallery-grid.is-dragging,
+.movie-grid.is-dragging {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+.gallery-grid.is-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+/* カスタム横スクロールバー */
+.gallery-grid::-webkit-scrollbar,
+.movie-grid::-webkit-scrollbar {
+  height: 8px;
+}
+
+.gallery-grid::-webkit-scrollbar-track,
+.movie-grid::-webkit-scrollbar-track {
+  background: rgba(10, 20, 48, 0.6);
+  border-radius: 999px;
+  margin: 0 4px;
+}
+
+.gallery-grid::-webkit-scrollbar-thumb,
+.movie-grid::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.65), rgba(124, 58, 237, 0.75));
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.gallery-grid::-webkit-scrollbar-thumb:hover,
+.movie-grid::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.9), rgba(124, 58, 237, 0.95));
 }
 
 .gallery-card {
@@ -1664,6 +1806,7 @@ ul, ol {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .gallery-card img {
@@ -1684,9 +1827,15 @@ ul, ol {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 20px;
+  padding: 16px;
   opacity: 0.85;
   transition: opacity var(--transition-fast);
+}
+
+.gallery-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(6, 182, 212, 0.2);
 }
 
 .gallery-card:hover img {
@@ -1698,14 +1847,14 @@ ul, ol {
 }
 
 .gallery-name {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #fff;
   margin-bottom: 4px;
 }
 
 .gallery-zoom-hint {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--accent-cyan);
   display: flex;
   align-items: center;
@@ -1715,16 +1864,6 @@ ul, ol {
 /* ============================================================
    4. 動画リストセクション (Movie)
    ============================================================ */
-.movie-section {
-  background: transparent;
-}
-
-.movie-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-}
-
 .movie-card {
   display: flex;
   flex-direction: column;
@@ -1734,12 +1873,15 @@ ul, ol {
   overflow: hidden;
   cursor: pointer;
   transition: all var(--transition-fast);
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .movie-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   border-color: var(--border-highlight);
   box-shadow: var(--shadow-card);
+  background: var(--bg-card-hover);
 }
 
 .movie-thumb-wrapper {
@@ -1771,10 +1913,10 @@ ul, ol {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 48px;
-  height: 48px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: rgba(255, 0, 0, 0.85);
+  background: rgba(239, 68, 68, 0.88);
   color: #fff;
   display: flex;
   align-items: center;
@@ -1783,34 +1925,242 @@ ul, ol {
   transition: transform var(--transition-fast), background var(--transition-fast);
 }
 
+.movie-play-badge svg {
+  width: 18px;
+  height: 18px;
+}
+
 .movie-card:hover .movie-play-badge {
-  transform: translate(-50%, -50%) scale(1.15);
+  transform: translate(-50%, -50%) scale(1.12);
   background: #ff0000;
 }
 
 .movie-card-body {
-  padding: 16px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  flex-grow: 1;
 }
 
 .movie-tag {
-  font-size: 0.75rem;
+  font-size: 0.70rem;
   font-weight: 700;
   color: var(--accent-pink);
   text-transform: uppercase;
 }
 
 .movie-card-title {
-  font-size: 0.95rem;
+  font-size: 0.90rem;
   font-weight: 700;
-  color: #fff;
+  color: #ffffff;
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ============================================================
+   ギャラリー ＆ 動画リスト 2行グリッド配置ルール
+   ============================================================ */
+
+/* --- 11個目以降（PC・スマホ共通: 奇数=1行目, 偶数=2行目, 列=6列目以降） --- */
+.gallery-grid > *:nth-child(2n+1):nth-child(n+11),
+.movie-grid > *:nth-child(2n+1):nth-child(n+11) {
+  grid-row: 1;
+}
+
+.gallery-grid > *:nth-child(2n):nth-child(n+12),
+.movie-grid > *:nth-child(2n):nth-child(n+12) {
+  grid-row: 2;
+}
+
+/* 11個目以降の列割り当て (11-12: 6列, 13-14: 7列, 15-16: 8列...) */
+.gallery-grid > *:nth-child(11), .gallery-grid > *:nth-child(12),
+.movie-grid > *:nth-child(11), .movie-grid > *:nth-child(12) { grid-column: 6; }
+
+.gallery-grid > *:nth-child(13), .gallery-grid > *:nth-child(14),
+.movie-grid > *:nth-child(13), .movie-grid > *:nth-child(14) { grid-column: 7; }
+
+.gallery-grid > *:nth-child(15), .gallery-grid > *:nth-child(16),
+.movie-grid > *:nth-child(15), .movie-grid > *:nth-child(16) { grid-column: 8; }
+
+.gallery-grid > *:nth-child(17), .gallery-grid > *:nth-child(18),
+.movie-grid > *:nth-child(17), .movie-grid > *:nth-child(18) { grid-column: 9; }
+
+.gallery-grid > *:nth-child(19), .gallery-grid > *:nth-child(20),
+.movie-grid > *:nth-child(19), .movie-grid > *:nth-child(20) { grid-column: 10; }
+
+.gallery-grid > *:nth-child(21), .gallery-grid > *:nth-child(22),
+.movie-grid > *:nth-child(21), .movie-grid > *:nth-child(22) { grid-column: 11; }
+
+.gallery-grid > *:nth-child(23), .gallery-grid > *:nth-child(24),
+.movie-grid > *:nth-child(23), .movie-grid > *:nth-child(24) { grid-column: 12; }
+
+.gallery-grid > *:nth-child(25), .gallery-grid > *:nth-child(26),
+.movie-grid > *:nth-child(25), .movie-grid > *:nth-child(26) { grid-column: 13; }
+
+.gallery-grid > *:nth-child(27), .gallery-grid > *:nth-child(28),
+.movie-grid > *:nth-child(27), .movie-grid > *:nth-child(28) { grid-column: 14; }
+
+.gallery-grid > *:nth-child(29), .gallery-grid > *:nth-child(30),
+.movie-grid > *:nth-child(29), .movie-grid > *:nth-child(30) { grid-column: 15; }
+
+.gallery-grid > *:nth-child(31), .gallery-grid > *:nth-child(32),
+.movie-grid > *:nth-child(31), .movie-grid > *:nth-child(32) { grid-column: 16; }
+
+.gallery-grid > *:nth-child(33), .gallery-grid > *:nth-child(34),
+.movie-grid > *:nth-child(33), .movie-grid > *:nth-child(34) { grid-column: 17; }
+
+.gallery-grid > *:nth-child(35), .gallery-grid > *:nth-child(36),
+.movie-grid > *:nth-child(35), .movie-grid > *:nth-child(36) { grid-column: 18; }
+
+.gallery-grid > *:nth-child(37), .gallery-grid > *:nth-child(38),
+.movie-grid > *:nth-child(37), .movie-grid > *:nth-child(38) { grid-column: 19; }
+
+.gallery-grid > *:nth-child(39), .gallery-grid > *:nth-child(40),
+.movie-grid > *:nth-child(39), .movie-grid > *:nth-child(40) { grid-column: 20; }
+
+.gallery-grid > *:nth-child(41), .gallery-grid > *:nth-child(42),
+.movie-grid > *:nth-child(41), .movie-grid > *:nth-child(42) { grid-column: 21; }
+
+.gallery-grid > *:nth-child(43), .gallery-grid > *:nth-child(44),
+.movie-grid > *:nth-child(43), .movie-grid > *:nth-child(44) { grid-column: 22; }
+
+.gallery-grid > *:nth-child(45), .gallery-grid > *:nth-child(46),
+.movie-grid > *:nth-child(45), .movie-grid > *:nth-child(46) { grid-column: 23; }
+
+.gallery-grid > *:nth-child(47), .gallery-grid > *:nth-child(48),
+.movie-grid > *:nth-child(47), .movie-grid > *:nth-child(48) { grid-column: 24; }
+
+.gallery-grid > *:nth-child(49), .gallery-grid > *:nth-child(50),
+.movie-grid > *:nth-child(49), .movie-grid > *:nth-child(50) { grid-column: 25; }
+
+/* --- PC画面（横長・表示領域幅に3枚と4枚目の半分＝3.5列＋横スクロール） --- */
+@media (min-width: 861px) {
+  .gallery-grid,
+  .movie-grid {
+    grid-auto-columns: calc((100% - 3 * 18px) / 3.5);
+    gap: 18px;
+  }
+
+  /* PC 1〜5個目: 1行目 (列1〜5) */
+  .gallery-grid > *:nth-child(1), .gallery-grid > *:nth-child(2), .gallery-grid > *:nth-child(3), .gallery-grid > *:nth-child(4), .gallery-grid > *:nth-child(5),
+  .movie-grid > *:nth-child(1), .movie-grid > *:nth-child(2), .movie-grid > *:nth-child(3), .movie-grid > *:nth-child(4), .movie-grid > *:nth-child(5) {
+    grid-row: 1;
+  }
+
+  /* PC 6〜10個目: 2行目 (列1〜5) */
+  .gallery-grid > *:nth-child(6), .gallery-grid > *:nth-child(7), .gallery-grid > *:nth-child(8), .gallery-grid > *:nth-child(9), .gallery-grid > *:nth-child(10),
+  .movie-grid > *:nth-child(6), .movie-grid > *:nth-child(7), .movie-grid > *:nth-child(8), .movie-grid > *:nth-child(9), .movie-grid > *:nth-child(10) {
+    grid-row: 2;
+  }
+
+  /* PC列割り当て（1〜10個目） */
+  .gallery-grid > *:nth-child(1), .gallery-grid > *:nth-child(6),
+  .movie-grid > *:nth-child(1), .movie-grid > *:nth-child(6) { grid-column: 1; }
+
+  .gallery-grid > *:nth-child(2), .gallery-grid > *:nth-child(7),
+  .movie-grid > *:nth-child(2), .movie-grid > *:nth-child(7) { grid-column: 2; }
+
+  .gallery-grid > *:nth-child(3), .gallery-grid > *:nth-child(8),
+  .movie-grid > *:nth-child(3), .movie-grid > *:nth-child(8) { grid-column: 3; }
+
+  .gallery-grid > *:nth-child(4), .gallery-grid > *:nth-child(9),
+  .movie-grid > *:nth-child(4), .movie-grid > *:nth-child(9) { grid-column: 4; }
+
+  .gallery-grid > *:nth-child(5), .gallery-grid > *:nth-child(10),
+  .movie-grid > *:nth-child(5), .movie-grid > *:nth-child(10) { grid-column: 5; }
+}
+
+/* --- スマホなどの縦長画面時（1枚と2枚目半分より少し表示＝1.6列＋横スクロール） --- */
+@media (max-width: 860px) {
+  .gallery-grid,
+  .movie-grid {
+    grid-auto-columns: calc((100% - 12px) / 1.6);
+    gap: 12px;
+    padding: 6px 2px 16px;
+  }
+
+  /* スマホ1行目: 1, 2, 3, 7, 9 */
+  .gallery-grid > *:nth-child(1), .gallery-grid > *:nth-child(2), .gallery-grid > *:nth-child(3),
+  .movie-grid > *:nth-child(1), .movie-grid > *:nth-child(2), .movie-grid > *:nth-child(3),
+  .gallery-grid > *:nth-child(7), .gallery-grid > *:nth-child(9),
+  .movie-grid > *:nth-child(7), .movie-grid > *:nth-child(9) {
+    grid-row: 1;
+  }
+
+  /* スマホ2行目: 4, 5, 6, 8, 10 */
+  .gallery-grid > *:nth-child(4), .gallery-grid > *:nth-child(5), .gallery-grid > *:nth-child(6),
+  .movie-grid > *:nth-child(4), .movie-grid > *:nth-child(5), .movie-grid > *:nth-child(6),
+  .gallery-grid > *:nth-child(8), .gallery-grid > *:nth-child(10),
+  .movie-grid > *:nth-child(8), .movie-grid > *:nth-child(10) {
+    grid-row: 2;
+  }
+
+  /* スマホ列割り当て（1〜10個目） */
+  .gallery-grid > *:nth-child(1), .gallery-grid > *:nth-child(4),
+  .movie-grid > *:nth-child(1), .movie-grid > *:nth-child(4) { grid-column: 1; }
+
+  .gallery-grid > *:nth-child(2), .gallery-grid > *:nth-child(5),
+  .movie-grid > *:nth-child(2), .movie-grid > *:nth-child(5) { grid-column: 2; }
+
+  .gallery-grid > *:nth-child(3), .gallery-grid > *:nth-child(6),
+  .movie-grid > *:nth-child(3), .movie-grid > *:nth-child(6) { grid-column: 3; }
+
+  .gallery-grid > *:nth-child(7), .gallery-grid > *:nth-child(8),
+  .movie-grid > *:nth-child(7), .movie-grid > *:nth-child(8) { grid-column: 4; }
+
+  .gallery-grid > *:nth-child(9), .gallery-grid > *:nth-child(10),
+  .movie-grid > *:nth-child(9), .movie-grid > *:nth-child(10) { grid-column: 5; }
+
+  /* スマホ用ボタン配置 */
+  .scroll-nav-btn {
+    width: 36px;
+    height: 36px;
+  }
+  .scroll-nav-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  .scroll-nav-btn.prev-btn {
+    left: -10px;
+  }
+  .scroll-nav-btn.next-btn {
+    right: -10px;
+  }
+
+  /* スマホ用カード内タイポグラフィ最適化 */
+  .movie-card-body {
+    padding: 10px 12px;
+    gap: 5px;
+  }
+  .movie-card-title {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .movie-tag {
+    padding: 2px 7px;
+    font-size: 0.65rem;
+  }
+  .movie-play-badge {
+    width: 32px;
+    height: 32px;
+  }
+  .movie-play-badge svg {
+    width: 16px;
+    height: 16px;
+  }
+  .gallery-name {
+    font-size: 0.85rem;
+  }
+  .gallery-overlay {
+    padding: 12px 14px;
+  }
+  .gallery-zoom-hint {
+    font-size: 0.72rem;
+  }
 }
 
 /* ============================================================
@@ -1842,6 +2192,7 @@ ul, ol {
   transform: translateY(-4px);
   border-color: var(--border-highlight);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), 0 0 20px rgba(124, 58, 237, 0.2);
+  background: var(--bg-card-hover);
 }
 
 .shop-image-wrapper {
@@ -2284,27 +2635,30 @@ ul, ol {
    ショップ詳細モーダル (購入先選択モーダル)
    ============================================================ */
 .modal-content.shop-modal-content {
-  background: #ffffff;
+  background: var(--bg-modal-gradient);
+  border: 1px solid rgba(56, 189, 248, 0.35);
   border-radius: 20px;
-  max-width: 380px;
+  max-width: 400px;
   width: 90%;
-  padding: 24px 20px 22px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
-  border: none;
+  padding: 26px 22px 24px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 35px rgba(24, 64, 144, 0.3);
   position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .shop-modal-close {
   position: absolute;
   top: 14px;
   right: 14px;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: #f1f5f9;
-  color: #475569;
-  border: none;
-  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 1.25rem;
   line-height: 1;
   display: flex;
   align-items: center;
@@ -2315,8 +2669,9 @@ ul, ol {
 }
 
 .shop-modal-close:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--accent-pink);
+  color: #ffffff;
+  border-color: var(--accent-pink);
 }
 
 .shop-modal-header {
@@ -2327,12 +2682,12 @@ ul, ol {
 }
 
 .shop-modal-thumb {
-  width: 60px;
-  height: 60px;
-  border-radius: 10px;
+  width: 68px;
+  height: 68px;
+  border-radius: 12px;
   object-fit: cover;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: rgba(6, 16, 38, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   flex-shrink: 0;
 }
 
@@ -2344,10 +2699,10 @@ ul, ol {
 }
 
 .shop-modal-title {
-  font-size: 0.98rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: #1e293b;
-  line-height: 1.35;
+  color: #ffffff;
+  line-height: 1.4;
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2363,11 +2718,11 @@ ul, ol {
 
 .shop-modal-subtitle {
   text-align: center;
-  color: #64748b;
+  color: #94a3b8;
   font-size: 0.82rem;
   font-weight: 600;
   margin: 20px 0 14px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
 }
 
 .shop-modal-links {
